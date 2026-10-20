@@ -11,3 +11,5 @@ models/
 reports/generated/
 .pytest_cache/
 .ruff_cache/
+*.joblib
+*.npy

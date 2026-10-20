@@ -4,9 +4,10 @@ An incremental project for examining data quality and model behavior before
 a release. Its intended scope is offline evaluation of scikit-learn binary
 classifiers, with explicit evidence and limitations.
 
-**Current stage: Phase 0 — foundation.** Configuration loading, package-scoped
-logging, and foundation tests are implemented. Model training, validation,
-reporting, and the public CLI are planned, not currently available.
+**Current stage: Phase 1 — data and baseline models.** The package includes
+configuration loading, logging, reproducible Telco preparation, and training for
+two baseline pipelines. Validation rules, reporting, and the public validation CLI
+remain later-phase work.
 
 ## Local setup
 
@@ -20,6 +21,32 @@ python -m venv .venv
 
 The import package is `modelaudit`. `configs/foundation.yaml` is a minimal
 example; it is not yet a model-validation configuration.
+
+## Prepare and train
+
+First review [dataset provenance and limitations](docs/DATASET.md). Raw and prepared
+data, fitted models, and generated reports stay local and are excluded from Git.
+
+```powershell
+.venv\Scripts\python scripts/prepare_data.py
+.venv\Scripts\python scripts/train_baselines.py
+```
+
+Each run uses a new output directory; existing outputs are never overwritten.
+The seed-42 split contains 5,634 training and 1,409 reference rows. On 2026-10-21,
+reference F1 was **0.5727** for Logistic Regression and **0.5501** for Random Forest
+at threshold 0.50. Repeat runs produced identical probabilities and metrics.
+These are educational baseline measurements, not deployment approval.
+
+See [workflow and model settings](docs/BASELINES.md) and
+[full measured results](docs/EXPERIMENTS.md). For the recorded dependency versions:
+
+```powershell
+.venv\Scripts\python -m pip install -e . -c constraints-python314.txt
+```
+
+The recorded environment is Python 3.14.6 on Windows 11. Other Python versions
+within the declared range have not yet been tested in this project.
 
 ## Development
 
