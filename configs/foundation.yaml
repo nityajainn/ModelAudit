@@ -1,0 +1,4 @@
+# Foundation example only; not a model-validation configuration.
+project:
+  name: ModelAudit
+  phase: 0
