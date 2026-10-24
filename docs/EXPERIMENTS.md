@@ -56,3 +56,43 @@ forecast, or fairness claim. No threshold or parameter tuning was performed.
 Calibration, segment behavior, drift, and controlled defective scenarios remain
 later-phase work. Reproducibility here is within one environment, not a promise
 of bitwise agreement on every platform or future library version.
+
+## 2026-10-25 — Phase 2 data-quality audit
+
+Ran the new checks twice against the existing seed-42 Phase 1 partitions. No data
+was downloaded, repaired, resplit, or used to refit the stored baseline models.
+All findings, policies and input hashes matched exactly between runs; context
+creation times differ by design. All four prepared artifact files were unchanged.
+
+| Measurement | Training | Reference |
+| --- | ---: | ---: |
+| Rows | 5,634 | 1,409 |
+| Missing TotalCharges | 10 (0.1775%) | 1 (0.0710%) |
+| Exact duplicate rows including ID and target | 0 | 0 |
+| Duplicate predictor rows beyond first | 27 | 4 |
+| Reference IDs also present in training | — | 0 |
+| Reference predictor rows also present in training | — | 10 (0.7097%) |
+
+The report contains **91 pass, 3 warn, 0 fail, and 0 skipped** findings. The warnings
+are predictor duplication in each partition and predictor overlap across them.
+All required columns and values satisfied the declared schema; the limited target
+association heuristics did not flag a predictor. Neither that result nor distinct
+customer IDs proves absence of leakage. Equal predictors can describe different
+customers, so the warnings are preserved for review rather than silently deduplicated.
+
+The full suite passed **69 tests in 13.280 seconds**, with warnings treated as
+errors. This includes 33 Phase 2 tests covering malformed schema/types, missingness
+boundaries, duplicates, overlap counts, exact/inverted target copies, numerical and
+categorical association, small/sparse/constant inputs, numerical precision, JSON,
+input preservation, command behavior, checksums and overwrite protection. The
+previous 36 tests still pass. Dependency consistency checks passed; no dependency
+versions changed from Phase 1.
+
+Local ignored evidence:
+- `reports/generated/phase2-data-audit-20261025.json`
+- `reports/generated/phase2-data-audit-20261025-repeat.json`
+- `reports/generated/phase2-verification-20261025.json`
+
+Reports record Python 3.14.6 and the runtime package versions, and honestly record
+parent commit `c038412` with a dirty working tree because verification preceded
+the Phase 2 commit. This entry records local verification, not remote publication.

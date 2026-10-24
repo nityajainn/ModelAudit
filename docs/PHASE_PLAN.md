@@ -6,8 +6,8 @@ scope, not completed capabilities. No future completion dates are assigned.
 | Phase | Deliverable | Status |
 | --- | --- | --- |
 | 0 | Package, safe configuration loading, logging, docs, tests | Implemented |
-| 1 | Reproducible data preparation and baseline models | Verified locally; awaiting push approval |
-| 2 | Schema, missingness, duplicates, overlap and leakage heuristics | Planned |
+| 1 | Reproducible data preparation and baseline models | Published |
+| 2 | Schema, missingness, duplicates, overlap and leakage heuristics | Verified locally; awaiting push approval |
 | 3 | Binary model metrics, calibration and threshold analysis | Planned |
 | 4 | Segment performance comparisons and support warnings | Planned |
 | 5 | Feature/prediction drift and labeled performance changes | Planned |

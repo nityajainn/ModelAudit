@@ -4,10 +4,10 @@ An incremental project for examining data quality and model behavior before
 a release. Its intended scope is offline evaluation of scikit-learn binary
 classifiers, with explicit evidence and limitations.
 
-**Current stage: Phase 1 — data and baseline models.** The package includes
-configuration loading, logging, reproducible Telco preparation, and training for
-two baseline pipelines. Validation rules, reporting, and the public validation CLI
-remain later-phase work.
+**Current stage: Phase 2 — data validation.** The package includes configuration
+loading, logging, reproducible Telco preparation, two baseline pipelines, and
+read-only data-quality checks. Model auditing, full reporting, and the public
+validation CLI remain later-phase work.
 
 ## Local setup
 
@@ -47,6 +47,26 @@ See [workflow and model settings](docs/BASELINES.md) and
 
 The recorded environment is Python 3.14.6 on Windows 11. Other Python versions
 within the declared range have not yet been tested in this project.
+
+## Inspect data quality
+
+After preparing the Phase 1 data:
+
+```powershell
+.venv\Scripts\python scripts/audit_data.py
+```
+
+The command checks schema, missing values, duplicates, cross-split overlap, and
+limited target-leakage heuristics. It writes aggregate findings and provenance to
+`reports/generated/phase2-data-audit.json`; choose a new `--output` filename to
+repeat it. Data and existing reports are never overwritten.
+
+The 2026-10-25 audit produced **91 passing findings, 3 warnings, and no failures**.
+Warnings identified 27 repeated predictor rows in training, 4 in reference data,
+and 10 reference rows matching training predictors. Customer IDs were disjoint.
+Shared predictors are not proof of leakage. The same findings repeated exactly;
+all 69 tests passed. See [check definitions and limitations](docs/DATA_VALIDATION.md)
+and [recorded results](docs/EXPERIMENTS.md).
 
 ## Development
 

@@ -51,3 +51,31 @@ GitHub attributed the commit to nityajainn only.
   were installed only in this project's isolated environment.
 - Phase 2 and later remain unimplemented. Phase 1 publication requires separate
   explicit user approval; no Phase 1 push is claimed here.
+
+## 2026-10-22 — Phase 1 publication confirmed
+
+After explicit user approval, commit `c038412` was published on main and
+phase/1-data-baselines. Phase 0 remained at `099c7f3`. Remote branches and all
+23 published file hashes were verified; GitHub listed only nityajainn as contributor.
+The actual October 21 commit timestamp was preserved. Original-project file and
+remote checks confirmed no changes.
+
+## 2026-10-25 — Phase 2 data validation verified locally
+
+- Started `codex/phase-2-data-validation` from published Phase 1, in this independent
+  repository. Recorded preservation fingerprints of the separate original project.
+- Defined acceptance criteria in DATA_VALIDATION.md and implemented read-only schema,
+  missingness, duplicate, split-overlap and limited leakage-association checks.
+- Added structured aggregate findings with explicit skipped states and documented
+  heuristic limitations. Added an adapter and development command for verified
+  Phase 1 partitions, with input hashes, runtime provenance and overwrite protection.
+- Passed all 69 tests with warnings treated as errors in 13.280 seconds, including
+  33 new Phase 2 tests. Dependency consistency checks passed without upgrades.
+- Audited the prepared Telco partitions twice: 91 passing findings, three review
+  warnings, zero failures, zero skips. Findings repeated exactly, and all prepared
+  files were unchanged. Actual results and warnings are in EXPERIMENTS.md.
+- Kept raw data, prepared data, stored models and generated reports outside Git.
+  No original-project code or commits were imported. Verified the nityajainn account
+  and the intended repository identity before preparing the new local commit.
+- Phase 3 and later remain planned. Phase 2 publication requires separate explicit
+  user approval; this log does not claim a Phase 2 push.

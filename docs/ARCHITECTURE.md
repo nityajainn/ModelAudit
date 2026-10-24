@@ -30,3 +30,20 @@ category vocabularies are fitted exclusively on training rows. Each pipeline
 retains preprocessing with its classifier. The reference split is only evaluated.
 Future validation checks can consume the preserved IDs, target, Contract column,
 and saved predictions without changing this preparation or training stage.
+
+## Phase 2 boundaries
+
+- `data_checks.py`: immutable schema/policy declarations and a read-only two-table
+  audit. Each finding separates the check, dataset, status, explanation, and
+  aggregate evidence. Invalid data yields failures/skips without automatic repair.
+- `data_audit.py`: adapts the existing verified Telco partitions to those checks,
+  verifies input fingerprints before and after, and writes an exclusive JSON report
+  with actual runtime/Git provenance.
+- `scripts/audit_data.py`: development entry point with explicit exit statuses;
+  it does not implement the planned Phase 6 public validation CLI.
+
+No new dependencies, fitted transforms, or model inference are introduced.
+The general in-memory checks can inspect defective data that the stricter Phase 1
+loader would reject. Correlation/category heuristics are review signals, not
+causal claims or guarantees that leakage is absent. Reports contain counts and
+column names, not raw records. See DATA_VALIDATION.md for thresholds and limits.
