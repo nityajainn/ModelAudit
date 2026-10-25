@@ -96,3 +96,67 @@ Local ignored evidence:
 Reports record Python 3.14.6 and the runtime package versions, and honestly record
 parent commit `c038412` with a dirty working tree because verification preceded
 the Phase 2 commit. This entry records local verification, not remote publication.
+
+## 2026-10-26 — Phase 3 model evaluation
+
+Evaluated the existing saved Phase 1 probabilities twice on the same 1,409
+reference rows: 374 positives and 1,035 negatives (26.5436% prevalence). No model
+was deserialized, refitted, recalibrated, or selected. All 19 existing data/model
+artifacts retained their hashes. Results excluding creation context matched exactly.
+
+| Metric | Logistic Regression | Random Forest |
+| --- | ---: | ---: |
+| Accuracy at 0.50 | 0.793471 | 0.786373 |
+| Balanced accuracy at 0.50 | 0.706589 | 0.692366 |
+| Precision at 0.50 | 0.635179 | 0.623729 |
+| Recall at 0.50 | 0.521390 | 0.491979 |
+| Specificity at 0.50 | 0.891787 | 0.892754 |
+| F1 at 0.50 | 0.572687 | 0.550075 |
+| ROC AUC | 0.843035 | 0.821429 |
+| PR AUC (trapezoidal) | 0.659655 | 0.608499 |
+| Average precision | 0.660382 | 0.606557 |
+| Brier score | 0.137061 | 0.146849 |
+| Log loss | 0.418178 | 0.490599 |
+| ECE (10 uniform bins) | 0.029187 | 0.035922 |
+
+Fixed-threshold confusion matrices, precision, recall, F1, PR AUC and average
+precision match the original Phase 1 summary exactly. The lower probability losses
+and ECE here are sample measurements, not certification of generalization or
+calibration. Phase 2's predictor-overlap warnings remain applicable.
+
+Calibration-bin counts, from [0, 0.1) through [0.9, 1]:
+
+- Logistic Regression: 539, 193, 143, 115, 112, 99, 117, 83, 8, 0.
+- Random Forest: 500, 215, 165, 123, 111, 85, 70, 57, 57, 26.
+
+Logistic Regression has eight observations in [0.8, 0.9), below the default
+20-row support threshold; the report preserves that warning. Its final bin is empty
+and retains null means/gaps. Random Forest has no occupied bin below the threshold.
+
+The grid compares thresholds 0.1 through 0.9. Selected descriptive rows are below;
+these are not recommendations or optimized settings.
+
+| Model | Threshold | Precision | Recall | F1 | Predicted positive rows |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Logistic Regression | 0.30 | 0.539326 | 0.770053 | 0.634361 | 534 |
+| Logistic Regression | 0.50 | 0.635179 | 0.521390 | 0.572687 | 307 |
+| Logistic Regression | 0.70 | 0.835165 | 0.203209 | 0.326882 | 91 |
+| Random Forest | 0.30 | 0.519849 | 0.735294 | 0.609081 | 529 |
+| Random Forest | 0.50 | 0.623729 | 0.491979 | 0.550075 | 295 |
+| Random Forest | 0.70 | 0.700000 | 0.262032 | 0.381323 | 140 |
+
+All **104 tests passed in 29.734 seconds** with warnings treated as errors, including
+35 new Phase 3 tests. Tests cover hand calculations, ties, perfect/inverted scores,
+single-class/undefined metrics, decimal calibration boundaries and their neighboring
+floating-point values, empty/sparse bins, threshold semantics, strict input/JSON,
+artifact corruption and row-order binding, input preservation and overwrite protection.
+Dependency consistency checks passed without version changes.
+
+Final ignored local evidence:
+- `reports/generated/phase3-model-audit-20261026-verified.json`
+- `reports/generated/phase3-model-audit-20261026-verified-repeat.json`
+- `reports/generated/phase3-verification-20261026-final.json`
+
+Reports record Python 3.14.6 and actual runtime versions. Their context honestly
+records parent commit `0fb3353` with a dirty working tree, because measurements were
+made before the Phase 3 commit. This records local verification, not publication.

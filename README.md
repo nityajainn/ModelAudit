@@ -4,10 +4,11 @@ An incremental project for examining data quality and model behavior before
 a release. Its intended scope is offline evaluation of scikit-learn binary
 classifiers, with explicit evidence and limitations.
 
-**Current stage: Phase 2 — data validation.** The package includes configuration
-loading, logging, reproducible Telco preparation, two baseline pipelines, and
-read-only data-quality checks. Model auditing, full reporting, and the public
-validation CLI remain later-phase work.
+**Current stage: Phase 3 — model evaluation.** The package includes configuration
+loading, logging, reproducible Telco preparation, two baseline pipelines, data-quality
+checks, binary model metrics, calibration measurements, and threshold comparisons.
+Segment analysis, drift, full reporting, and the public validation CLI remain
+later-phase work.
 
 ## Local setup
 
@@ -65,8 +66,28 @@ The 2026-10-25 audit produced **91 passing findings, 3 warnings, and no failures
 Warnings identified 27 repeated predictor rows in training, 4 in reference data,
 and 10 reference rows matching training predictors. Customer IDs were disjoint.
 Shared predictors are not proof of leakage. The same findings repeated exactly;
-all 69 tests passed. See [check definitions and limitations](docs/DATA_VALIDATION.md)
+all 69 tests available at that phase passed. See [check definitions and limitations](docs/DATA_VALIDATION.md)
 and [recorded results](docs/EXPERIMENTS.md).
+
+## Evaluate saved model predictions
+
+After preparing data and training the Phase 1 baselines:
+
+```powershell
+.venv\Scripts\python scripts/audit_models.py
+```
+
+This evaluates the verified saved probability arrays, without loading or retraining
+models. It reports binary classification/ranking scores, Brier score, log loss,
+calibration bins, and a descriptive threshold sweep. The default decision threshold
+remains 0.50; no new threshold is selected. Choose a fresh `--output` filename for
+repeat reports. Outputs stay local under `reports/generated/`.
+
+On 2026-10-26, ROC AUC was **0.8430** for Logistic Regression and **0.8214** for
+Random Forest on the 1,409 reference rows. Logistic Regression had one sparse
+calibration-bin warning (eight rows in [0.8, 0.9)). All **104 tests passed**, and
+repeat evaluations matched exactly. See [definitions and limitations](docs/MODEL_EVALUATION.md)
+and [the measured comparisons](docs/EXPERIMENTS.md).
 
 ## Development
 

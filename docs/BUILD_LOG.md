@@ -79,3 +79,31 @@ remote checks confirmed no changes.
   and the intended repository identity before preparing the new local commit.
 - Phase 3 and later remain planned. Phase 2 publication requires separate explicit
   user approval; this log does not claim a Phase 2 push.
+
+## 2026-10-25 — Phase 2 publication confirmed
+
+After explicit user approval, `0fb3353` was published on main and
+phase/2-data-validation. Earlier phase branches remained unchanged. Remote hashes
+and all 28 published files matched locally; GitHub listed only nityajainn as
+contributor. All 13,069 original-project files and remotes remained unchanged.
+
+## 2026-10-26 — Phase 3 model evaluation verified locally
+
+- Started `codex/phase-3-model-evaluation` from published Phase 2 in this independent
+  repository. Recorded original-project file fingerprints before implementation.
+- Defined acceptance criteria and metric conventions in MODEL_EVALUATION.md.
+  Added binary classification/ranking metrics, probability scores, supported
+  calibration bins and threshold comparisons with explicit undefined outcomes.
+- Added a hash-verifying adapter for the two existing Phase 1 probability arrays
+  and a local development command. No models are deserialized or retrained.
+- Passed 104 tests in 29.734 seconds with warnings treated as errors. The 35 new
+  tests include a decimal-boundary regression and corrupt/empty artifact handling.
+  Dependency consistency checks passed without upgrades.
+- Evaluated both baseline arrays twice. Results matched exactly and prior Phase 1
+  measurements remained equal. All 19 saved data/model artifacts were unchanged.
+  Recorded actual scores, threshold comparisons and the sparse-bin warning in
+  EXPERIMENTS.md. Generated reports stay local and ignored by Git.
+- Verified the nityajainn account and intended repository identity before preparing
+  the local commit. No existing history was imported, rewritten or backdated.
+- Phase 4 and later remain planned. Phase 3 publication requires separate explicit
+  user approval; no Phase 3 push is claimed here.

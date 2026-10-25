@@ -47,3 +47,20 @@ The general in-memory checks can inspect defective data that the stricter Phase 
 loader would reject. Correlation/category heuristics are review signals, not
 causal claims or guarantees that leakage is absent. Reports contain counts and
 column names, not raw records. See DATA_VALIDATION.md for thresholds and limits.
+
+## Phase 3 boundaries
+
+- `evaluation.py`: validates aligned binary arrays, computes fixed-threshold and
+  ranking metrics, probability scores, uniform calibration bins and a descriptive
+  threshold grid. Undefined scores have null values and reasons; no fitting or
+  threshold selection occurs.
+- `model_audit.py`: verifies Phase 1 summary/partition/prediction hashes and evaluates
+  only the two fixed probability arrays. It uses `allow_pickle=False`, never loads
+  joblib models, rechecks inputs before writing, and creates an exclusive report.
+- `scripts/audit_models.py`: development entry point with path, fixed-threshold and
+  bin-count options. Full validation configuration and orchestration remain Phase 6.
+
+No dependencies were added or changed. Existing Phase 1 metrics and artifacts remain
+unchanged. Calibration bins use integer-boundary division so decimal boundaries
+follow the documented left-inclusive convention; empty bins remain visible.
+MODEL_EVALUATION.md defines the metrics, single-class policy and support warnings.

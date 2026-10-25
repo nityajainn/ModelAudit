@@ -57,8 +57,9 @@ baseline evaluation. The reference prevalence is reported for context.
 
 `pr_auc_trapezoidal` integrates the precision–recall curve; `average_precision`
 uses recall-increment weighting. They are deliberately separate measurements.
-Calibration, per-segment metrics, drift, and configurable quality gates belong to
-later phases.
+Phase 3 now evaluates calibration, further binary metrics, and threshold comparisons
+from these saved predictions; see [model evaluation](MODEL_EVALUATION.md). Per-segment
+metrics, drift, and configurable quality gates remain later-phase work.
 
 Each run creates two fitted `.joblib` pipelines, corresponding `.npy` reference
 probabilities, and `summary.json`. Probability order follows the ID-sorted reference
