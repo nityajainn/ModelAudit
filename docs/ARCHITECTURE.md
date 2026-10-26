@@ -64,3 +64,21 @@ No dependencies were added or changed. Existing Phase 1 metrics and artifacts re
 unchanged. Calibration bins use integer-boundary division so decimal boundaries
 follow the documented left-inclusive convention; empty bins remain visible.
 MODEL_EVALUATION.md defines the metrics, single-class policy and support warnings.
+
+## Phase 4 boundaries
+
+- `segments.py`: evaluates independent categorical groups with the Phase 3 metric
+  engine. It records missing groups, exact support, metric-specific comparison
+  exclusions, signed differences from overall performance, and supported ranges.
+- `segment_audit.py`: evaluates categorical predictor columns on the same verified
+  reference rows and saved arrays, defaulting to Contract. It excludes IDs, target
+  and numeric columns from the artifact-level grouping options.
+- `scripts/audit_segments.py`: local development command with column, threshold
+  and support settings; it does not implement full Phase 6 orchestration.
+
+Phase 3's existing artifact checks are shared through internal input-loading and
+post-read verification helpers in `model_audit.py`. Its public interface and report
+shape remain unchanged; regression tests and the real Phase 3 report agree exactly.
+Neither path deserializes models. No dependency versions or training code changed.
+Support policies are documented in SEGMENT_EVALUATION.md; there is no threshold
+optimization, significance test, intersectional grouping, or fairness decision.

@@ -8,8 +8,8 @@ scope, not completed capabilities. No future completion dates are assigned.
 | 0 | Package, safe configuration loading, logging, docs, tests | Implemented |
 | 1 | Reproducible data preparation and baseline models | Published |
 | 2 | Schema, missingness, duplicates, overlap and leakage heuristics | Published |
-| 3 | Binary model metrics, calibration and threshold analysis | Verified locally; awaiting push approval |
-| 4 | Segment performance comparisons and support warnings | Planned |
+| 3 | Binary model metrics, calibration and threshold analysis | Published |
+| 4 | Segment performance comparisons and support warnings | Verified locally; awaiting push approval |
 | 5 | Feature/prediction drift and labeled performance changes | Planned |
 | 6 | Full configuration, CLI, orchestration and reports | Planned |
 | 7 | Controlled defective scenarios and recorded experiments | Planned |

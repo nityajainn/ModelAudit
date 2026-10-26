@@ -160,3 +160,62 @@ Final ignored local evidence:
 Reports record Python 3.14.6 and actual runtime versions. Their context honestly
 records parent commit `0fb3353` with a dirty working tree, because measurements were
 made before the Phase 3 commit. This records local verification, not publication.
+
+## 2026-10-26 — Phase 4 Contract comparisons
+
+Evaluated both saved models twice at threshold 0.50, grouping the same 1,409
+reference rows by Contract. The groups contain 780 Month-to-month customers (329
+positives), 295 One year customers (36 positives), and 334 Two year customers
+(9 positives). There are no missing Contract values. Each grouping retains every
+row and reproduces the overall confusion counts and support.
+
+| Model | Contract | Predicted positives | Precision | Recall | F1 | Supported F1 difference from overall |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| Logistic Regression | Month-to-month | 307 | 0.635179 | 0.592705 | 0.613208 | 0.040520 |
+| Logistic Regression | One year | 0 | null | 0.000000 | 0.000000 | -0.572687 |
+| Logistic Regression | Two year | 0 | null | 0.000000 | 0.000000 | null |
+| Random Forest | Month-to-month | 292 | 0.626712 | 0.556231 | 0.589372 | 0.039297 |
+| Random Forest | One year | 3 | 0.333333 | 0.027778 | 0.051282 | -0.498793 |
+| Random Forest | Two year | 0 | null | 0.000000 | 0.000000 | null |
+
+All groups meet the 30-row requirement, but Two year has only nine actual positives,
+below the ten-positive requirement for recall, F1, balanced-accuracy and ranking
+comparisons. Its defined raw measurements remain visible; affected comparisons
+are null with explanations. This is a support limitation, not a claim that the
+measurements are zero or that the group performed acceptably.
+
+At 0.50, Logistic Regression predicts no positives for either annual-contract group,
+so their precision is undefined. Random Forest predicts only three positives for
+One year; its measured precision is 1/3, but that comparison is withheld because
+it needs ten predicted positives. It predicts none for Two year. Month-to-month
+has no support warnings for either model. There are six support-warning entries
+across the six model/group combinations, distinct from metric exclusion reasons.
+
+Supported F1 ranges use Month-to-month and One year only; Two year is excluded:
+
+- Logistic Regression: minimum 0.000000, maximum 0.613208, gap 0.613208.
+- Random Forest: minimum 0.051282, maximum 0.589372, gap 0.538090.
+
+These gaps are descriptive sample differences, not significance, causation or
+fairness conclusions. The overall comparator includes each group. No model,
+threshold, or data split was changed in response to these results; the Phase 2
+predictor-overlap warnings remain relevant.
+
+All **137 tests passed in 24.391 seconds** with warnings treated as errors, including
+33 new Phase 4 tests. Coverage includes hand-calculated scores/deltas/ranges, support
+threshold boundaries and denominator-specific exclusions, missing and single-class
+groups, no predicted positives, independent columns, alignment, cardinality limits,
+input preservation, integrity failures and command behavior. Dependency consistency
+checks passed. The shared loader left the full real Phase 3 report unchanged
+apart from creation context. All 19 data/model artifacts were hash-identical before
+and after both repeat segment runs and the Phase 3 regression run.
+
+Final ignored local evidence:
+- `reports/generated/phase4-segment-audit-20261026.json`
+- `reports/generated/phase4-segment-audit-20261026-repeat.json`
+- `reports/generated/phase4-phase3-regression-20261026.json`
+- `reports/generated/phase4-verification-20261026.json`
+
+Reports record actual runtime versions and UTC creation times. Their Git context
+honestly records parent `7cd6198` with a dirty working tree because measurement
+preceded the Phase 4 commit. This entry records local verification, not publication.

@@ -4,11 +4,11 @@ An incremental project for examining data quality and model behavior before
 a release. Its intended scope is offline evaluation of scikit-learn binary
 classifiers, with explicit evidence and limitations.
 
-**Current stage: Phase 3 — model evaluation.** The package includes configuration
+**Current stage: Phase 4 — segment performance.** The package includes configuration
 loading, logging, reproducible Telco preparation, two baseline pipelines, data-quality
-checks, binary model metrics, calibration measurements, and threshold comparisons.
-Segment analysis, drift, full reporting, and the public validation CLI remain
-later-phase work.
+checks, binary model metrics, calibration measurements, threshold comparisons, and
+segment comparisons with support warnings. Drift, full reporting, and the public
+validation CLI remain later-phase work.
 
 ## Local setup
 
@@ -85,9 +85,29 @@ repeat reports. Outputs stay local under `reports/generated/`.
 
 On 2026-10-26, ROC AUC was **0.8430** for Logistic Regression and **0.8214** for
 Random Forest on the 1,409 reference rows. Logistic Regression had one sparse
-calibration-bin warning (eight rows in [0.8, 0.9)). All **104 tests passed**, and
+calibration-bin warning (eight rows in [0.8, 0.9)). All **104 tests available at Phase 3 passed**, and
 repeat evaluations matched exactly. See [definitions and limitations](docs/MODEL_EVALUATION.md)
 and [the measured comparisons](docs/EXPERIMENTS.md).
+
+## Compare customer segments
+
+```powershell
+.venv\Scripts\python scripts/audit_segments.py
+```
+
+The default compares the three `Contract` groups at the same 0.50 threshold, using
+verified saved predictions. Each group retains its scores, support counts and
+warnings. Differences from overall performance and group ranges exclude metrics
+with insufficient support. Use `--columns` for other categorical predictors and a
+fresh `--output` path to repeat a report. Generated reports stay local.
+
+The 2026-10-26 reference data contains 780 Month-to-month, 295 One year and 334 Two
+year customers. The Two year group has only nine positive cases, below the default
+ten-positive comparison requirement. The report also flags very few predicted
+positives in the annual-contract groups. All **137 tests passed**; repeated reports
+matched exactly and the Phase 3 measurements remained unchanged.
+See [support rules and limitations](docs/SEGMENT_EVALUATION.md) and
+[the measured segment results](docs/EXPERIMENTS.md).
 
 ## Development
 

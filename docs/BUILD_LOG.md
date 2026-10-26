@@ -107,3 +107,33 @@ contributor. All 13,069 original-project files and remotes remained unchanged.
   the local commit. No existing history was imported, rewritten or backdated.
 - Phase 4 and later remain planned. Phase 3 publication requires separate explicit
   user approval; no Phase 3 push is claimed here.
+
+## 2026-10-26 — Phase 3 publication confirmed
+
+After explicit user approval, `7cd6198` was published on main and
+phase/3-model-evaluation. Earlier branches and timestamps were preserved. All 33
+published files matched locally, and GitHub listed only nityajainn as contributor.
+The original project and its remotes were unchanged by that publication.
+
+## 2026-10-26 — Phase 4 segment evaluation verified locally
+
+- Started `codex/phase-4-segment-evaluation` from published Phase 3 in this independent
+  checkout. Captured the current original-project baseline before implementation.
+- Defined acceptance criteria in SEGMENT_EVALUATION.md. Implemented independent
+  categorical comparisons with group/overall metrics, missing-group accounting,
+  metric-specific support rules, signed differences and supported-group ranges.
+- Shared the existing verified-prediction loader with Phase 3 and added the segment
+  adapter/development command. No model deserialization or retraining occurs.
+- Passed 137 tests in 24.391 seconds with warnings treated as errors, including 33
+  new Phase 4 tests. Dependency checks passed without installing or updating packages.
+- Evaluated Contract groups twice: all results matched. Preserved unsupported
+  comparisons and warnings for nine positive Two year cases and too few predicted
+  positives in annual-contract groups. Actual measurements are in EXPERIMENTS.md.
+- The full real Phase 3 report remained unchanged apart from runtime context. All
+  19 saved data/model artifacts retained their hashes. Reports remain ignored.
+- Verified all 13,112 original-project files (including Git state) against this
+  phase's starting snapshot with no changes. Original remotes remain unchanged.
+- Verified the nityajainn account and destination identity. No inherited commits,
+  history rewrites, altered dates, or co-author trailers were introduced.
+- Phases 5–7 remain planned. Phase 4 requires separate explicit push approval;
+  no Phase 4 publication is claimed by this log.

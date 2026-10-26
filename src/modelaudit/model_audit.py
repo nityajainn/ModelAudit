@@ -12,17 +12,8 @@ from .evaluation import DEFAULT_THRESHOLDS, evaluate_binary
 BASELINE_NAMES = ("logistic_regression", "random_forest")
 
 
-def audit_baseline_predictions(prepared: str | Path, models: str | Path, output: str | Path,
-                               *, threshold=0.5, thresholds=DEFAULT_THRESHOLDS,
-                               n_bins=10, minimum_bin_rows=20) -> dict:
-    """Verify prediction/data pairing and write a new aggregate report.
-
-    Hashes detect changes, not malicious replacement of both data and manifest.
-    Only the fixed Phase 1 filenames are read. No joblib file is loaded.
-    """
-    prepared, models, output = Path(prepared), Path(models), Path(output)
-    if output.exists():
-        raise FileExistsError(f"Choose a new report path: {output}")
+def _load_prediction_inputs(prepared: Path, models: Path):
+    """Shared verification for Phase 3/4; fixed filenames, no model deserialization."""
     paths = {f"prepared/{name}": prepared / name
              for name in ("manifest.json", "train.csv", "reference.csv")}
     paths["models/summary.json"] = models / "summary.json"
@@ -40,7 +31,7 @@ def audit_baseline_predictions(prepared: str | Path, models: str | Path, output:
     entries = summary.get("models")
     if not isinstance(entries, dict) or set(entries) != set(BASELINE_NAMES):
         raise ValueError("Baseline summary must contain exactly the two Phase 1 models.")
-    evaluations = {}
+    predictions = {}
     for name in BASELINE_NAMES:
         entry = entries[name]
         key = f"models/{name}_probabilities.npy"
@@ -53,12 +44,33 @@ def audit_baseline_predictions(prepared: str | Path, models: str | Path, output:
         if not isinstance(probabilities, np.ndarray):
             probabilities.close()
             raise ValueError("Expected a single numerical .npy array.")
-        evaluations[name] = evaluate_binary(reference[TARGET].to_numpy(), probabilities,
-                                            threshold=threshold, thresholds=thresholds,
-                                            n_bins=n_bins, minimum_bin_rows=minimum_bin_rows)
+        predictions[name] = probabilities
+    return reference, predictions, paths, before
+
+
+def _verify_prediction_inputs(paths, before):
     after = {key: fingerprint(path) for key, path in paths.items()}
     if before != after:
         raise ValueError("An input changed during evaluation; no report was written.")
+
+
+def audit_baseline_predictions(prepared: str | Path, models: str | Path, output: str | Path,
+                               *, threshold=0.5, thresholds=DEFAULT_THRESHOLDS,
+                               n_bins=10, minimum_bin_rows=20) -> dict:
+    """Verify prediction/data pairing and write a new aggregate report.
+
+    Hashes detect changes, not malicious replacement of both data and manifest.
+    Only the fixed Phase 1 filenames are read. No joblib file is loaded.
+    """
+    prepared, models, output = Path(prepared), Path(models), Path(output)
+    if output.exists():
+        raise FileExistsError(f"Choose a new report path: {output}")
+    reference, predictions, paths, before = _load_prediction_inputs(prepared, models)
+    evaluations = {name: evaluate_binary(reference[TARGET].to_numpy(), probabilities,
+                                         threshold=threshold, thresholds=thresholds,
+                                         n_bins=n_bins, minimum_bin_rows=minimum_bin_rows)
+                   for name, probabilities in predictions.items()}
+    _verify_prediction_inputs(paths, before)
     result = {"format_version": 1, "context": run_context(), "inputs": before,
               "prediction_source": "Phase 1 P(Churn=1) arrays in verified reference CSV row order",
               "model_deserialization_performed": False, "models": evaluations}
