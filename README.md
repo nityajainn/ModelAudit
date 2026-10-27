@@ -4,11 +4,12 @@ An incremental project for examining data quality and model behavior before
 a release. Its intended scope is offline evaluation of scikit-learn binary
 classifiers, with explicit evidence and limitations.
 
-**Current stage: Phase 4 — segment performance.** The package includes configuration
+**Current stage: Phase 5 — drift analysis (verified locally).** The package includes configuration
 loading, logging, reproducible Telco preparation, two baseline pipelines, data-quality
 checks, binary model metrics, calibration measurements, threshold comparisons, and
-segment comparisons with support warnings. Drift, full reporting, and the public
-validation CLI remain later-phase work.
+segment comparisons with support warnings, feature/prediction distribution comparisons,
+and supported labeled performance changes. Full reporting and the public validation
+CLI remain later-phase work.
 
 ## Local setup
 
@@ -108,6 +109,31 @@ positives in the annual-contract groups. All **137 tests passed**; repeated repo
 matched exactly and the Phase 3 measurements remained unchanged.
 See [support rules and limitations](docs/SEGMENT_EVALUATION.md) and
 [the measured segment results](docs/EXPERIMENTS.md).
+
+## Compare offline snapshots
+
+Phase 5 compares explicitly declared feature columns, an optional probability column,
+and optional binary labels in two CSV snapshots. Predictions and labels must share
+their snapshot's row order. Numerical distributions use empirical CDF distance;
+categorical distributions and probability histograms use total variation. Missing
+values, unseen categories, unsupported performance differences and absent labels
+remain explicit. No fitting, model deserialization, threshold tuning or release
+approval occurs.
+
+```powershell
+.venv\Scripts\python scripts/audit_drift.py --reference data/reference_snapshot.csv --current data/current_snapshot.csv --numeric tenure MonthlyCharges TotalCharges --categorical Contract --probability probability --target Churn --output reports/generated/drift-review.json
+```
+
+Prepare these snapshot files explicitly; they are not downloaded or inferred by the
+command. Omit prediction/label options for feature-only analysis. Both CSVs must
+contain only the declared columns; a declared target may be absent. Existing inputs
+and reports are never overwritten. Reports stay local and may include category labels.
+
+On 2026-10-28, all **176 tests passed**, including 39 Phase 5 tests. Repeated audits
+of the prepared random split and reference-versus-itself checks agreed exactly.
+All 19 saved data/model artifacts were unchanged. These checks verify behavior,
+not real production drift. See [input contracts and limits](docs/DRIFT_ANALYSIS.md)
+and [the recorded evidence](docs/EXPERIMENTS.md). Phase 5 publication requires approval.
 
 ## Development
 

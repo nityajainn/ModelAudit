@@ -219,3 +219,61 @@ Final ignored local evidence:
 Reports record actual runtime versions and UTC creation times. Their Git context
 honestly records parent `7cd6198` with a dirty working tree because measurement
 preceded the Phase 4 commit. This entry records local verification, not publication.
+
+## 2026-10-28 — Phase 5 snapshot comparison verification
+
+Compared the unchanged 5,634-row training partition (reference argument) against
+the 1,409-row held-out partition (current argument) across all 19 predictors.
+These names specify comparison direction, not time order: both are from the same
+seed-42 random stratified split. No production-period data is available here.
+
+| Numeric predictor | Reference/current observed rows | Empirical CDF distance |
+| --- | ---: | ---: |
+| tenure | 5,634 / 1,409 | 0.010146749193089777 |
+| MonthlyCharges | 5,634 / 1,409 | 0.029838733855812538 |
+| TotalCharges | 5,624 / 1,408 | 0.020842089098668026 |
+
+TotalCharges has ten missing training observations and one missing held-out
+observation. Its missing-fraction difference is -0.0010652146692253991, measured
+separately from its nonmissing distribution. Other numeric predictors have no
+missing values. All observed feature supports meet the default 30-row rule.
+
+Categorical total variation ranges from 0.004521493628489526 (Contract) to
+0.0279950155612545 (StreamingTV). There are no unseen categorical values in the
+held-out split. These are descriptive sample differences, without a drift cutoff,
+significance claim or approval decision. Phase 2's predictor-overlap warnings
+remain relevant; this comparison does not establish independent populations.
+
+For each saved baseline, exported a local snapshot containing the verified held-out
+features, labels and its aligned saved probability array. Compared that snapshot
+with itself at threshold 0.50: all 19 feature distances, prediction KS distance,
+prediction-histogram total variation and all 11 supported performance differences
+are exactly zero for both models. This is an identity sanity check, not evidence
+that production behavior is stable. Nothing was retrained or deserialized.
+
+Ran the feature comparison and both model checks twice. Results match exactly
+after excluding runtime context. All 19 pre-existing data/model files retain their
+original SHA-256 values. Source manifests and prediction checksums were verified
+before exporting; local snapshot CSVs and generated reports remain ignored by Git.
+
+All **176 tests passed in 31.222 seconds** with warnings treated as errors, including
+39 new Phase 5 tests. Coverage includes hand-computed distances, an independent
+SciPy statistic cross-check, ties, unequal sizes, all-missing cases, category unions,
+support boundaries, score directions, absent/partial labels, decimal probability
+bins, invalid types/schema, input immutability, strict JSON, CSV integrity and command
+behavior. A fixture demonstrates that identical marginal probability distributions
+can coexist with a large performance loss. It is a unit-test fixture, not a recorded
+real-data defect experiment. Phase 7 controlled experiments remain planned.
+Dependency checks passed without package changes.
+
+Ignored local evidence:
+
+- `reports/generated/phase5-features-20261028.json` and its `-repeat.json` counterpart
+- `reports/generated/phase5-logistic_regression-self-20261028.json` and repeat
+- `reports/generated/phase5-random_forest-self-20261028.json` and repeat
+- `reports/generated/phase5-verification-20261028.json`
+- `reports/generated/phase5-snapshots-20261028/` (the four source CSV snapshots)
+
+Reports retain actual UTC runtime timestamps and parent commit `afa76e2` with a
+dirty working tree: verification preceded the new commit. Phase 5 is verified
+locally and awaits separate explicit push approval.

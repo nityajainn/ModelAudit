@@ -82,3 +82,22 @@ shape remain unchanged; regression tests and the real Phase 3 report agree exact
 Neither path deserializes models. No dependency versions or training code changed.
 Support policies are documented in SEGMENT_EVALUATION.md; there is no threshold
 optimization, significance test, intersectional grouping, or fairness decision.
+
+## Phase 5 boundaries
+
+- `drift.py`: strict snapshot roles, numeric empirical CDF distance, categorical
+  total variation, explicit missing/new-category accounting, probability distances
+  and supported labeled score changes. Tables have their own positional row order;
+  index labels do not join populations. No fitting or mutation occurs.
+- `drift_audit.py`: reads strict CSV snapshots with predictions/labels in the same
+  rows as features. It checks before/after hashes and creates exclusive aggregate
+  reports with runtime provenance, without loading models.
+- `scripts/audit_drift.py`: development command requiring two named snapshot files
+  and explicit column roles. Full configuration/orchestration remain Phase 6.
+
+Labeled comparisons reuse Phase 3 metric definitions and Phase 4 support helpers.
+Existing modules, dependencies and saved data/model artifacts are unchanged. Feature
+comparisons do not require labels or predictions; absent labels skip performance
+measurement, while incomplete/invalid labels fail rather than silently drop rows.
+DRIFT_ANALYSIS.md defines distance semantics, directions, support and limitations.
+No production chronology, independence or model identity is inferred from a CSV.

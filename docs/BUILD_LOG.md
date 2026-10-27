@@ -137,3 +137,35 @@ The original project and its remotes were unchanged by that publication.
   history rewrites, altered dates, or co-author trailers were introduced.
 - Phases 5–7 remain planned. Phase 4 requires separate explicit push approval;
   no Phase 4 publication is claimed by this log.
+
+## 2026-10-28 — Phase 4 publication rechecked
+
+Confirmed the prior approved Phase 4 publication: main and
+phase/4-segment-evaluation both point to `afa76e2`. Phase 0–3 remote branches remain
+at their existing commits, with no tags. The second account and repository identity
+were verified as nityajainn and repository 1427414883. No remote state was changed.
+
+## 2026-10-28 — Phase 5 drift analysis verified locally
+
+- Started `codex/phase-5-drift-analysis` from published Phase 4 in the independent
+  ModelAudit-Lab checkout. Captured a fresh baseline of 13,112 original-project files
+  including its Git state. Its working tree was clean and origin remained ModelGate.
+- Defined acceptance criteria in DRIFT_ANALYSIS.md. Implemented read-only numerical,
+  categorical and probability distribution comparisons, explicit missing/new-category
+  accounting, and labeled performance deltas using existing metric/support rules.
+- Added a strict CSV adapter and development command with same-row prediction/label
+  alignment, hash checks, provenance and exclusive report creation. No model loading,
+  threshold tuning, dependency changes, or edits to prior phase implementations.
+- Passed 176 tests in 31.222 seconds with warnings treated as errors, including
+  39 new Phase 5 tests. Dependency consistency checks passed. A row-permutation test
+  uses a numerical tolerance for ordinary last-bit floating-point reduction changes.
+- Repeated all-19-feature split comparisons and both saved-model identity checks.
+  Outputs matched exactly apart from runtime context; all 19 saved data/model files
+  were unchanged. Actual results and limits are recorded in EXPERIMENTS.md.
+- These are offline split/identity checks, not production-period observations.
+  Generated snapshots/reports remain local and ignored. Phases 6–7 remain planned.
+- Rechecked all 13,112 original-project files against the starting baseline with
+  no changed paths. The original remotes and published Phase 0–4 branch hashes
+  remain unchanged. Verified nityajainn authentication without switching accounts.
+- Phase 5 requires separate explicit push approval. No Phase 5 publication is
+  claimed, and no commit timestamp is fabricated or overridden.
