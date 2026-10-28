@@ -1,0 +1,11 @@
+# Prepare the two snapshots explicitly; see docs/DRIFT_ANALYSIS.md.
+version: 1
+checks:
+  drift:
+    reference: ../data/reference_snapshot.csv
+    current: ../data/current_snapshot.csv
+    numeric: [tenure, MonthlyCharges, TotalCharges]
+    categorical: [Contract]
+    probability: probability
+    target: Churn
+gates: []

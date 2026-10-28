@@ -17,5 +17,8 @@ dependencies = [
     "joblib>=1.4,<2",
 ]
 
+[project.scripts]
+modelaudit = "modelaudit.cli:main"
+
 [tool.setuptools.packages.find]
 where = ["src"]

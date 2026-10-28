@@ -169,3 +169,38 @@ were verified as nityajainn and repository 1427414883. No remote state was chang
   remain unchanged. Verified nityajainn authentication without switching accounts.
 - Phase 5 requires separate explicit push approval. No Phase 5 publication is
   claimed, and no commit timestamp is fabricated or overridden.
+
+## 2026-10-29 — Phase 5 publication rechecked
+
+Confirmed the previously approved publication: main and phase/5-drift-analysis
+point to `1cc99e8`. Earlier phase branches and real timestamps remain preserved,
+with no tags. The intended public repository is still nityajainn/ModelAudit,
+repository 1427414883. No remote changes were made during this verification.
+
+## 2026-10-29 — Phase 6 configuration, CLI and reports verified locally
+
+- Started `codex/phase-6-cli-reports` from published Phase 5 in the independent
+  ModelAudit-Lab checkout. Captured a fresh baseline of the original project's
+  current 13,205 files including Git state; its working tree was clean.
+- Defined acceptance criteria and output/outcome rules in CLI_REPORTS.md. Added
+  strict versioned configuration, a public installed/module command, sequential
+  orchestration of existing checks, numeric result gates and readable reports.
+- Kept measurements separate from gate decisions. Undefined measurements and
+  missing evidence remain explicit; no deployment approval is implied. Reports
+  use new exclusive directories, full-sequence input checks and a final manifest.
+- Added escaped Markdown/HTML summaries plus JSON evidence. Partial runs retain
+  their evidence and a failure marker when possible, with no completion claim.
+- Passed all 209 tests in 73.465 seconds with warnings treated as errors, including
+  33 new Phase 6 tests. Registered the new entry point using an isolated package
+  build after confirming the venv lacked setuptools; runtime versions were unchanged.
+- Ran the installed command on baseline artifacts and twice with all four checks.
+  All completed with review status (16 locations), no data failures and matching
+  output hashes. Repeat results and prior Phase 3–5 measurements were preserved;
+  all 44 pre-existing data/model/report files were unchanged. See EXPERIMENTS.md.
+- Verified the nityajainn account and destination identity without switching or
+  removing credentials. No original-project source or history was imported.
+- Rechecked all 13,205 original-project files against this phase's starting
+  baseline with no changed paths, including Git state. Its original origin and
+  secondary URLs remain unchanged; remote Phase 0–5 branch hashes are preserved.
+- Phase 7 remains planned. Phase 6 requires separate explicit push approval;
+  no Phase 6 publication or altered historical timestamps are claimed here.

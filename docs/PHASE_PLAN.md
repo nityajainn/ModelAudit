@@ -10,8 +10,8 @@ scope, not completed capabilities. No future completion dates are assigned.
 | 2 | Schema, missingness, duplicates, overlap and leakage heuristics | Published |
 | 3 | Binary model metrics, calibration and threshold analysis | Published |
 | 4 | Segment performance comparisons and support warnings | Published |
-| 5 | Feature/prediction drift and labeled performance changes | Verified locally; awaiting push approval |
-| 6 | Full configuration, CLI, orchestration and reports | Planned |
+| 5 | Feature/prediction drift and labeled performance changes | Published |
+| 6 | Full configuration, CLI, orchestration and reports | Verified locally; awaiting push approval |
 | 7 | Controlled defective scenarios and recorded experiments | Planned |
 
 For each phase: define acceptance criteria, implement its scope, run tests,

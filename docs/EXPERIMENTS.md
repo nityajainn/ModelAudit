@@ -277,3 +277,59 @@ Ignored local evidence:
 Reports retain actual UTC runtime timestamps and parent commit `afa76e2` with a
 dirty working tree: verification preceded the new commit. Phase 5 is verified
 locally and awaits separate explicit push approval.
+
+## 2026-10-29 — Phase 6 configured command and reports
+
+Registered the installed `modelaudit` command in the independent checkout's existing
+virtual environment. The initial no-build-isolation installation could not find
+setuptools in that environment; a normal isolated build registered the command
+successfully, without adding/upgrading runtime dependencies. Dependency checks passed.
+
+Ran the shipped baseline configuration once and a local all-checks configuration
+twice. All three runs used the installed command from a different working directory,
+verifying that input paths resolve from the configuration and not the shell location.
+The all-checks configuration combines the unchanged baseline artifacts with the
+existing Phase 5 Logistic Regression reference snapshot compared with itself.
+It is a workflow/identity check, not a new production-period experiment. No metric
+gate thresholds were invented for these recorded runs (`gates: []`).
+
+| Run | Enabled checks | Outcome | Exit | Review locations | Data failures | Output files hashed |
+| --- | --- | --- | ---: | ---: | ---: | ---: |
+| baseline | data, evaluation, segments | review | 1 | 16 | 0 | 6 |
+| all | data, evaluation, segments, drift | review | 1 | 16 | 0 | 7 |
+| all-repeat | data, evaluation, segments, drift | review | 1 | 16 | 0 | 7 |
+
+The 16 review items comprise three data-quality warnings, two evaluation warning/
+undefined-evidence locations, and eleven segment warning/undefined-evidence locations.
+These include the existing predictor duplicates/overlap, sparse calibration support,
+unsupported precision and small-group support. Locations can share a cause, so 16
+does not mean 16 distinct defects. Drift identity comparisons add no review items.
+Exit 1 correctly reports the need for review; all checks and report writes completed.
+
+Every output hash matched its completion manifest. The two all-check reports match
+exactly after excluding actual runtime context. Full Phase 3, Phase 4 and Phase 5
+adapter outputs also match their prior saved reports after excluding context.
+All 44 pre-existing files under data/, models/ and reports/generated/ retained their
+hashes, including the 19 saved data/model artifacts. No models were deserialized.
+
+All **209 tests passed in 73.465 seconds** with warnings treated as errors, including
+33 new Phase 6 tests. Tests cover strict schemas, defaults/path resolution, duplicate
+and unsafe YAML, optional checks, gate bounds and unavailable evidence, all-check
+integration, output hashes, input/config changes, protected output locations,
+partial failures, repeatability, report escaping, and command exit codes. HTML
+structure was parsed to verify tables and absence of scripts/remote assets;
+Markdown label escaping prevents injected links/images/HTML. Installed command
+version and dependency consistency checks also passed.
+
+Ignored local evidence:
+
+- `reports/generated/phase6-baseline-20261029/`
+- `reports/generated/phase6-all-20261029/`
+- `reports/generated/phase6-all-repeat-20261029/`
+- `reports/generated/phase6-inputs-20261029/all-checks.yaml`
+- `reports/generated/phase6-verification-20261029.json`
+
+Run directories include their full JSON evidence, Markdown/HTML summaries and
+completion manifests. Provenance records real UTC times and parent `1cc99e8` with
+a dirty working tree because verification preceded the Phase 6 commit. Phase 7
+controlled experiments remain planned; Phase 6 publication awaits explicit approval.

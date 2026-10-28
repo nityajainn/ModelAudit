@@ -12,8 +12,8 @@ independent of the current directory. Phase 0 has two small modules:
 
 Phase 0 required only PyYAML. Phase 1 adds NumPy, pandas, scikit-learn, and joblib.
 Tests use standard-library unittest with the project's runtime dependencies.
-No CLI entry point is advertised before its Phase 6 implementation. Future
-modules will separate preparation, measurements, policy checks, and reporting.
+Phase 6 exposes the `modelaudit` entry point and `python -m modelaudit`. Preparation,
+measurements, policy checks and reporting remain separate modules.
 
 ## Phase 1 boundaries
 
@@ -101,3 +101,27 @@ comparisons do not require labels or predictions; absent labels skip performance
 measurement, while incomplete/invalid labels fail rather than silently drop rows.
 DRIFT_ANALYSIS.md defines distance semantics, directions, support and limitations.
 No production chronology, independence or model identity is inferred from a CSV.
+
+## Phase 6 boundaries
+
+- `audit_config.py`: validates version 1 audit schemas on top of the existing safe
+  YAML loader, expands defaults and resolves input paths relative to the YAML file.
+  Only declared check options are supported; no dynamic imports or expressions.
+- `runner.py`: runs enabled data/evaluation/segment/drift adapters sequentially,
+  checking configuration and input hashes across the full sequence. Each run owns
+  a new output directory. The completion manifest is written last; failures retain
+  partial evidence and a failure marker where possible.
+- `decisions.py`: collects review/failure locations and evaluates inclusive scalar
+  bounds through literal result paths. Undefined/non-numeric/missing measurements
+  produce unavailable gates. Failure overrides review, which overrides pass.
+- `reporting.py`: renders a summary of measured results, support and all review
+  items as escaped Markdown and self-contained HTML. Full evidence remains JSON.
+- `cli.py` / `__main__.py`: public `check-config` and `run` commands, help/version,
+  package-scoped progress logging and explicit exit codes. The installed command
+  is registered in pyproject.toml; no runtime dependencies were added or upgraded.
+
+Phase 2–5 measurement engines and existing development scripts remain unchanged.
+The foundation YAML loader retains its generic behavior; its docstring now points
+to the separate schema validator. Configuration/gate semantics, output completion
+rules and limits are in CLI_REPORTS.md. A complete audit may require review or fail;
+only the final valid manifest distinguishes completion from a partial run.

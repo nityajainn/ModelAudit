@@ -4,12 +4,13 @@ An incremental project for examining data quality and model behavior before
 a release. Its intended scope is offline evaluation of scikit-learn binary
 classifiers, with explicit evidence and limitations.
 
-**Current stage: Phase 5 — drift analysis (verified locally).** The package includes configuration
+**Current stage: Phase 6 — configuration, CLI and reports (verified locally).** The package includes configuration
 loading, logging, reproducible Telco preparation, two baseline pipelines, data-quality
 checks, binary model metrics, calibration measurements, threshold comparisons, and
 segment comparisons with support warnings, feature/prediction distribution comparisons,
-and supported labeled performance changes. Full reporting and the public validation
-CLI remain later-phase work.
+and supported labeled performance changes. A public command now runs the configured
+checks and creates JSON, Markdown and offline HTML reports. Controlled defect
+experiments remain Phase 7 work.
 
 ## Local setup
 
@@ -133,7 +134,36 @@ On 2026-10-28, all **176 tests passed**, including 39 Phase 5 tests. Repeated au
 of the prepared random split and reference-versus-itself checks agreed exactly.
 All 19 saved data/model artifacts were unchanged. These checks verify behavior,
 not real production drift. See [input contracts and limits](docs/DRIFT_ANALYSIS.md)
-and [the recorded evidence](docs/EXPERIMENTS.md). Phase 5 publication requires approval.
+and [the recorded evidence](docs/EXPERIMENTS.md). Phase 5 is published.
+
+## Run one configured audit
+
+After installing the package and creating the Phase 1 data/model artifacts:
+
+```powershell
+.venv\Scripts\modelaudit check-config --config configs/audit.yaml
+.venv\Scripts\modelaudit run --config configs/audit.yaml --output reports/generated/my-audit
+```
+
+For an existing installation, rerun `python -m pip install -e .` in the virtual
+environment to register the new command. `python -m modelaudit` is equivalent.
+The example runs data quality, evaluation and segment checks. Add a configured
+drift check for your own explicitly prepared snapshots; `configs/drift.yaml`
+illustrates the required inputs. Paths in YAML resolve relative to that file.
+
+Open `summary.html` in the new output folder for readable results. `report.json`
+contains the full evidence, and the final `manifest.json` records completion and
+output hashes. Every run needs a fresh folder. Existing inputs and reports are
+never overwritten. Configured numeric gates retain unavailable values and support
+warnings instead of turning them into passes.
+
+Exit 0 means the configured checks passed; exit 1 means a completed audit needs
+review or failed a check; exit 2 means the audit could not complete. These outcomes
+are not deployment approval. The recorded baseline audit completed with **16
+review items and no data failures**. All **209 tests passed**, repeated results
+matched, and all 44 pre-existing data/model/report artifacts remained unchanged.
+See [configuration, gate and completion rules](docs/CLI_REPORTS.md) and
+[actual Phase 6 results](docs/EXPERIMENTS.md). Publication awaits separate approval.
 
 ## Development
 

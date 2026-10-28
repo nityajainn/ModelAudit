@@ -32,7 +32,7 @@ _UniqueKeyLoader.add_constructor(
 
 
 def load_config(path: str | Path) -> dict[str, Any]:
-    """Load one nonempty YAML mapping; full schema validation is Phase 6.
+    """Load one nonempty YAML mapping; audit_config validates the audit schema.
 
     YAML merge keys and duplicate keys are intentionally rejected.
     File access errors remain OSError so callers can distinguish them.

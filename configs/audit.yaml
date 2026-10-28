@@ -1,0 +1,19 @@
+# Paths are relative to this YAML file, not your shell's working directory.
+version: 1
+inputs:
+  prepared: ../data/prepared
+  models: ../models/baseline
+checks:
+  data: {}
+  evaluation:
+    threshold: 0.5
+    thresholds: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+    n_bins: 10
+    minimum_bin_rows: 20
+  segments:
+    columns: [Contract]
+    minimum_rows: 30
+    minimum_class_rows: 10
+    minimum_predicted_positives: 10
+# No universal release thresholds are asserted by this example.
+gates: []
