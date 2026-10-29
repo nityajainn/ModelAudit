@@ -30,6 +30,30 @@ def _finding(result, check, dataset="reference", column=None):
 def _case(identifier, mutation, parameters, results, evidence, expectations, gates=()):
     decision = summarize_results(results, gates)
     observations = [{"description": description, "met": bool(met)} for description, met in expectations]
+    # Verify decisions independently of the decision engine under test.
+    expected_gates = []
+    for gate in gates:
+        value = results
+        try:
+            for part in gate["path"]:
+                value = value[part]
+        except (KeyError, IndexError, TypeError):
+            value = None
+        status = ("unavailable" if type(value) not in (int, float) or not math.isfinite(value)
+                  else "pass" if gate.get("minimum", -math.inf) <= value <= gate.get("maximum", math.inf)
+                  else "fail")
+        expected_gates.append(status)
+    findings = results.get("data", {}).get("findings", [])
+    expected_failure = any(f["status"] == "fail" for f in findings) or "fail" in expected_gates
+    observations.append({"description": "Every configured gate has the expected verdict.",
+                         "met": [g["status"] for g in decision["gates"]] == expected_gates})
+    observations.append({"description": "Aggregate failure agrees with data failures and gates.",
+                         "met": (decision["status"] == "fail") == expected_failure})
+    if "unavailable" in expected_gates and not expected_failure:
+        observations.append({"description": "Unavailable gates require review.",
+                             "met": decision["status"] == "review" and decision["exit_code"] == 1})
+    observations.append({"description": "Audit exit agrees with its verdict.",
+                         "met": decision["exit_code"] == (0 if decision["status"] == "pass" else 1)})
     return {"id": identifier, "mutation": mutation, "parameters": parameters,
             "evidence": evidence, "expectations": observations,
             "expectations_met": all(row["met"] for row in observations),

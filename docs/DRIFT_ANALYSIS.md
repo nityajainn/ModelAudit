@@ -1,5 +1,9 @@
 # Phase 5 acceptance criteria and comparison contract
 
+The original phase protocol below remains applicable to its saved-artifact API.
+The October 30 scope corrections add the [raw fitted-model workflow](RAW_AUDITS.md);
+see the [correction record](SCOPE_CORRECTIONS.md) for current capabilities.
+
 Compare two explicitly named offline snapshots without fitting, repairing, or
 overwriting inputs. Feature drift must work without predictions or labels;
 prediction drift must work without labels. Compare labeled binary performance

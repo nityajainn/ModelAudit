@@ -235,3 +235,29 @@ The destination is still nityajainn/ModelAudit, repository 1427414883.
   or credentials. No inherited commits or artificial dates were introduced.
 - All planned phases are implemented locally. Phase 7 remains pending separate
   explicit push approval; no Phase 7 publication is claimed by this entry.
+
+
+## 2026-10-30 - Phase 7 scope corrections verified locally
+
+After the user's review request, compared ModelAudit with the original roadmap
+and identified incomplete current-data/fitted-model integration, best-segment
+comparisons, full-CLI experiments and experiment-verdict assertions. The user
+then authorized closing those gaps. Work took place only on
+`codex/phase-7-scope-corrections` in the independent ModelAudit-Lab checkout.
+
+Implemented the correction scope documented in SCOPE_CORRECTIONS.md and
+RAW_AUDITS.md, while preserving existing commands, saved artifacts and phase
+history. Added 29 regression tests; all 267 tests passed with warnings treated
+as errors in 122.560 seconds. The tests repeat the ten-audit fitted-model suite
+and reject false verdicts, blocked/missing evidence and execution errors.
+Installed commands run outside the checkout passed the real-data raw audit
+(review expected), all 12 saved-score controls and all 10 fitted-model controls.
+Dependency integrity passed with no package changes.
+
+The original-project preservation snapshot and prior ModelAudit artifact hashes
+were checked separately. Verified nityajainn authentication and destination
+repository identity; published main and phase branches still point to their
+previous commits. No original code, history, remote or credential configuration
+was changed. Restored planned Phases 8 and 9, and corrected the stale Phase 7
+publication wording. This entry records local verification, not push approval
+or publication of these corrections.

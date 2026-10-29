@@ -132,7 +132,20 @@ def evaluate_segments(labels, probabilities, segments: pd.DataFrame, *, threshol
                               "maximum": max(eligible) if enough else None,
                               "gap": max(eligible) - min(eligible) if enough else None,
                               "undefined_reason": None if enough else "At least two supported groups are required."}
-        columns.append({"column": name, "missing_rows": missing_rows,
+        best = {}
+        for metric in METRICS:
+            candidates = [row for row in rows if metric not in row["comparison_exclusions"]]
+            choose = min if metric in PROBABILITY_METRICS else max
+            value = choose(row["metrics"][metric] for row in candidates) if candidates else None
+            best[metric] = {"value": value, "groups": [row["value"] for row in candidates
+                            if row["metrics"][metric] == value], "candidate_count": len(candidates)}
+            for row in rows:
+                reason = row["comparison_exclusions"].get(metric)
+                row.setdefault("difference_from_best", {})[metric] = (None if reason or value is None
+                    else row["metrics"][metric] - value)
+                row.setdefault("best_comparison_reasons", {})[metric] = (reason or
+                    ("At least two supported groups are required." if len(candidates) < 2 else None))
+        columns.append({"column": name, "missing_rows": missing_rows, "best_by_metric": best,
                         "warnings": ([{"code": "missing_segment_values", "count": missing_rows}]
                                      if missing_rows else []),
                         "groups": rows, "supported_ranges": ranges})

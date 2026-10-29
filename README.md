@@ -4,7 +4,7 @@ An incremental project for examining data quality and model behavior before
 a release. Its intended scope is offline evaluation of scikit-learn binary
 classifiers, with explicit evidence and limitations.
 
-**Current stage: Phase 7 — controlled experiments (verified locally).** The package includes configuration
+**Current stage: Phase 7 - published baseline, with scope corrections verified locally; push approval pending.** The package includes configuration
 loading, logging, reproducible Telco preparation, two baseline pipelines, data-quality
 checks, binary model metrics, calibration measurements, threshold comparisons, and
 segment comparisons with support warnings, feature/prediction distribution comparisons,
@@ -186,9 +186,30 @@ Random Forest. Labeled comparisons exposed what marginal drift checks could not.
 
 All **238 tests passed**, including 29 new Phase 7 tests. All 69 pre-existing
 data/model/report files were unchanged. See the [scenario protocol and limits](docs/CONTROLLED_EXPERIMENTS.md)
-and [recorded results](docs/EXPERIMENTS.md). The planned phases are implemented
-locally; Phase 7 publication awaits separate approval. This is an educational
+and [recorded results](docs/EXPERIMENTS.md). The initial Phase 7 implementation is published. The October 30 review identified
+scope gaps; [the correction record](docs/SCOPE_CORRECTIONS.md) describes the local
+follow-up. Phases 8 (CI/package verification) and 9 (MLflow) remain planned. This is an educational
 offline toolkit, not a production-readiness certification.
+
+## Fitted-model audits and full CLI controls
+
+Version 2 configuration audits raw training/reference/current CSV snapshots and
+uses an explicitly trusted, checksum-pinned fitted binary model. Invalid data
+produces findings; blocked prediction-dependent checks remain visible while
+independent feature checks continue. No model is fitted during an ordinary audit.
+See [the version 2 contract](docs/RAW_AUDITS.md).
+
+The additional synthetic protocol fits two clean laboratory models once each,
+then runs five scenarios per model through the ordinary audit CLI:
+
+```powershell
+.venv\Scripts\modelaudit experiments --mode fitted --output reports/generated/my-fitted-controls
+```
+
+It tests a clean control, contamination, an audit-only target copy, unlabeled
+feature drift, and a group-specific degradation hidden by overall F1. These are
+invented rows, not new measurements on real customers. The original saved-score
+protocol remains available with `--mode saved` and now checks gate verdicts too.
 
 ## Development
 

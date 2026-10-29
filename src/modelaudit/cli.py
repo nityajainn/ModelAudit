@@ -4,6 +4,7 @@ import argparse
 import csv
 from importlib.metadata import version
 import logging
+import subprocess
 from pathlib import Path
 
 from .audit_config import load_audit_config
@@ -27,6 +28,8 @@ def main(argv=None):
     experiments.add_argument("--models", type=Path, default=Path("models/baseline"))
     experiments.add_argument("--output", type=Path, required=True)
     experiments.add_argument("--quiet", action="store_true")
+    experiments.add_argument("--mode", choices=("saved", "fitted"), default="saved")
+    experiments.add_argument("--seed", type=int, default=42)
     args = parser.parse_args(argv)
     try:
         if args.command == "check-config":
@@ -35,13 +38,17 @@ def main(argv=None):
             return 0
         configure_logging(logging.ERROR if args.quiet else logging.INFO)
         if args.command == "experiments":
-            summary = run_experiments(args.prepared, args.models, args.output)
+            if args.mode == "fitted":
+                from .cli_experiments import run_cli_experiments
+                summary = run_cli_experiments(args.output, args.seed)
+            else:
+                summary = run_experiments(args.prepared, args.models, args.output)
             matched = sum(case["expectations_met"] for case in summary["scenarios"])
             print(f"Experiments complete: {matched}/{len(summary['scenarios'])} scenarios matched expectations; "
-                  f"report={args.output.resolve() / 'summary.html'}")
+                  f"report={args.output.resolve() / ('summary.json' if args.mode == 'fitted' else 'summary.html')}")
             return summary["exit_code"]
         report = run_audit(args.config, args.output)
-    except (OSError, ValueError, csv.Error) as exc:
+    except (OSError, ValueError, csv.Error, subprocess.SubprocessError) as exc:
         label = "Experiments" if args.command == "experiments" else "Audit"
         parser.exit(2, f"{label} could not complete: {exc}\n")
     decision = report["decision"]

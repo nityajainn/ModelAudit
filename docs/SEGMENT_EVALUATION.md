@@ -1,5 +1,9 @@
 # Phase 4: segment performance
 
+The original phase protocol below remains applicable to its saved-artifact API.
+The October 30 scope corrections add the [raw fitted-model workflow](RAW_AUDITS.md);
+see the [correction record](SCOPE_CORRECTIONS.md) for current capabilities.
+
 ## Acceptance criteria
 
 - Compare observed categorical groups at one shared threshold using Phase 3's

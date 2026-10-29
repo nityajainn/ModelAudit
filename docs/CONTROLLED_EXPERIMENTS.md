@@ -1,4 +1,9 @@
-# Phase 7 controlled experiment protocol
+# Phase 7 controlled experiment protocols
+
+The original saved-score protocol below is retained. The fitted-model CLI
+protocol added after the scope review is described in [RAW_AUDITS.md](RAW_AUDITS.md).
+It adds five scenarios across two models, using ten ordinary audit subprocesses.
+Both protocols now verify expected decisions as well as measurements.
 
 ## Purpose and acceptance criteria
 
@@ -101,8 +106,8 @@ Checksums detect accidental changes, not coordinated replacement. This finite
 scenario suite cannot establish sensitivity/specificity on real incidents, cover
 all joint/conditional drift, establish causal effects, or prove absence of leakage
 or bias. Source-data limitations and prior overlap warnings remain relevant.
-Completion of this phase completes the planned educational offline toolkit,
-not a claim of production readiness or monitoring coverage.
+Phase 7 does not complete the full roadmap: Phase 8 testing/CI/package verification
+and Phase 9 MLflow remain planned. These controls do not establish production readiness.
 
 For the positive-class score convention see [scikit-learn ROC AUC](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.roc_auc_score.html).
 For background on leakage beyond this deliberately obvious target-copy scenario,

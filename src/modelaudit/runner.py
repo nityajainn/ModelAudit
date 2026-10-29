@@ -15,6 +15,8 @@ from .segment_audit import audit_baseline_segments
 
 
 def _input_paths(config, config_path):
+    if config["version"] == 2:
+        return {"configuration":config_path, **{f"inputs/{k}":Path(v) for k,v in config["inputs"].items()}}
     paths = {"configuration": config_path}
     if "prepared" in config["inputs"]:
         paths.update({f"prepared/{name}": Path(config["inputs"]["prepared"]) / name
@@ -44,14 +46,21 @@ def run_audit(config_path, output) -> dict:
     before = {name: fingerprint(path) for name, path in paths.items()}
     if before["configuration"] != first_config_hash:
         raise ValueError("Configuration changed during loading; no output was created.")
-    for protected in config["inputs"].values():
+    for protected in (config["inputs"].values() if config["version"] == 1 else []):
         if output.is_relative_to(Path(protected)):
             raise ValueError("Output cannot be inside the prepared data or model directory.")
     output.mkdir(parents=True, exist_ok=False)
-    results, files = {}, []
+    results, files, coverage = {}, [], {}
     logger = logging.getLogger("modelaudit")
     try:
-        for name, options in config["checks"].items():
+        if config["version"] == 2:
+            from .raw_audit import run_raw_checks
+            results, coverage = run_raw_checks(config)
+            for name, result in results.items():
+                destination = output / f"{name}.json"
+                write_json(destination, result)
+                files.append(destination.name)
+        for name, options in (config["checks"].items() if config["version"] == 1 else []):
             logger.info("Running %s checks", name)
             destination = output / f"{name}.json"
             if name == "data":
@@ -68,7 +77,8 @@ def run_audit(config_path, output) -> dict:
             raise ValueError("An input changed across the audit; no completion manifest was written.")
         report = {"format_version": 1, "context": run_context(), "configuration": config,
                   "inputs": before, "results": results, "decision": summarize_results(results, config["gates"]),
-                  "model_deserialization_performed": False}
+                  "model_deserialization_performed": config["version"] == 2 and config["model"] is not None,
+                  "coverage": coverage}
         markdown, html = render_reports(report)
         write_json(output / "report.json", report)
         files.append("report.json")

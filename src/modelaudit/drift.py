@@ -103,7 +103,7 @@ def _numeric_drift(reference, current, minimum):
             "warnings": _support(len(first), len(second), minimum)}
 
 
-def _categorical_drift(reference, current, minimum, maximum):
+def _categorical_drift(reference, current, minimum, maximum, smoothing):
     first, second = Counter(reference), Counter(current)
     levels = sorted((first.keys() | second.keys()) - {None})
     if None in first or None in second:
@@ -116,7 +116,18 @@ def _categorical_drift(reference, current, minimum, maximum):
              "current_fraction": second[level] / len(current),
              "new_in_current": level is not None and level not in first} for level in levels]
     unseen = sum(row["current_count"] for row in rows if row["new_in_current"])
+    # Base-2 Jensen-Shannon distance, including missing values as a category.
+    # Keep total variation as a separate named measurement for compatibility.
+    p = np.array([row["reference_fraction"] for row in rows])
+    q = np.array([row["current_fraction"] for row in rows])
+    p = (1-smoothing)*p + smoothing/len(p)
+    q = (1-smoothing)*q + smoothing/len(q)
+    midpoint = (p + q) / 2
+    divergence = sum(float(np.sum(v[v > 0] * np.log2(v[v > 0] / midpoint[v > 0])))
+                     for v in (p, q)) / 2
     return {"kind": "categorical", "categories": rows,
+            "jensen_shannon_distance": float(np.sqrt(max(0.0, divergence))),
+            "smoothing": smoothing, "smoothing_definition": "(1-epsilon)*observed_fraction + epsilon/K",
             "total_variation": sum(abs(row["current_fraction"] - row["reference_fraction"])
                                    for row in rows) / 2,
             "new_category_rows": unseen, "new_category_fraction": unseen / len(current),
@@ -153,12 +164,15 @@ def _prediction_drift(reference, current, threshold, n_bins, minimum):
 def compare_snapshots(reference: pd.DataFrame, current: pd.DataFrame, *, numeric=(),
                       categorical=(), probability=None, target=None, threshold=0.5,
                       minimum_rows=30, minimum_class_rows=10,
-                      minimum_predicted_positives=10, maximum_categories=100, n_bins=10) -> dict:
+                      minimum_predicted_positives=10, maximum_categories=100, n_bins=10, smoothing=1e-6) -> dict:
     """Compare marginal distributions and supported scores; never infer time order.
 
     Predictions/labels occupy their own snapshot's row order. The caller supplies
     model/positive-class semantics. Unknown or conflicting column roles fail.
     """
+    smoothing = _threshold(smoothing)
+    if smoothing >= 1:
+        raise ValueError("smoothing must be in [0,1).")
     required = _roles(numeric, categorical, probability, target)
     threshold = _threshold(threshold)
     minimum_rows = _positive_integer(minimum_rows, "minimum_rows")
@@ -178,7 +192,7 @@ def compare_snapshots(reference: pd.DataFrame, current: pd.DataFrame, *, numeric
     features = {name: _numeric_drift(_numeric(reference[name]), _numeric(current[name]), minimum_rows)
                 for name in sorted(numeric)}
     features.update({name: _categorical_drift(_categories(reference[name]), _categories(current[name]),
-                                             minimum_rows, maximum_categories)
+                                             minimum_rows, maximum_categories, smoothing)
                      for name in sorted(categorical)})
     predictions = {"status": "skipped", "reason": "No probability column declared."}
     performance = {"status": "skipped", "reason": "Complete labels and probabilities are required in both snapshots."}
@@ -213,7 +227,7 @@ def compare_snapshots(reference: pd.DataFrame, current: pd.DataFrame, *, numeric
             "threshold": threshold, "difference_direction": "current_minus_reference",
             "policy": {"minimum_rows": minimum_rows, "minimum_class_rows": minimum_class_rows,
                        "minimum_predicted_positives": minimum_predicted_positives,
-                       "maximum_categories": maximum_categories, "n_bins": n_bins},
+                       "maximum_categories": maximum_categories, "n_bins": n_bins, "smoothing": smoothing},
             "features": features, "predictions": predictions, "performance": performance,
             "limitations": ["Marginal descriptive distances are not significance tests or deployment gates.",
                             "No time ordering, population independence, model identity or causal explanation is inferred.",

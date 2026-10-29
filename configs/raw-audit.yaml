@@ -1,0 +1,20 @@
+# Replace the trust flag and fingerprint only after verifying your own model.
+version: 2
+inputs:
+  train: ../data/prepared/train.csv
+  reference: ../data/prepared/reference.csv
+  model: ../models/baseline/logistic_regression.joblib
+schema:
+  numeric: [tenure, MonthlyCharges, TotalCharges]
+  categorical: [gender, SeniorCitizen, Partner, Dependents, PhoneService, MultipleLines, InternetService, OnlineSecurity, OnlineBackup, DeviceProtection, TechSupport, StreamingTV, StreamingMovies, Contract, PaperlessBilling, PaymentMethod]
+  target: Churn
+  identifier: customerID
+model:
+  trusted: false
+  sha256: '0000000000000000000000000000000000000000000000000000000000000000'
+checks:
+  data: {}
+  evaluation: {}
+  segments:
+    columns: [Contract]
+gates: []

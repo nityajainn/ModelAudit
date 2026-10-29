@@ -411,3 +411,20 @@ Ignored local evidence:
 Reports retain actual UTC timestamps and parent commit `7854ebd` with a dirty
 working tree because verification preceded the Phase 7 commit. The planned local
 implementation is complete; Phase 7 publication still requires explicit approval.
+
+
+## 2026-10-30 - Fitted-model CLI controls after scope review
+
+Both Logistic Regression and Random Forest passed all five expected scenarios
+(10 audits, 196 assertions) through the ordinary CLI. Clean returned pass/0;
+contamination fail/1; audit-only target copy review/1; unlabeled feature drift
+fail/1; segment degradation fail/1. The defect deliberately retained overall
+F1 .90 while annual-group recall fell to 0 and the other group stayed at 1.
+These are synthetic controls, not additional Telco benchmark results.
+
+The installed raw audit of the existing verified Telco Logistic Regression
+artifact retained F1 0.5726872246696035 with zero data failures and review needed.
+The installed saved-score protocol matched all 12 scenarios after strengthening
+verdict assertions. New evidence is in ignored
+reports/generated/phase7-scope-final-20261030/. See SCOPE_CORRECTIONS.md for test,
+provenance and preservation details. Prior experiment evidence is unchanged.

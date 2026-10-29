@@ -147,3 +147,27 @@ No model is fitted or deserialized, no source manifest is rewritten, and altered
 features are not assigned fabricated model responses. Score transformations are
 labeled as manipulations. The protocol and limitations are documented in
 CONTROLLED_EXPERIMENTS.md; measurements are in EXPERIMENTS.md.
+
+
+## Scope corrections through Phase 7
+
+The existing version 1 artifact route remains available. Version 2 follows:
+`raw_config -> raw_audit -> data findings -> trusted fitted inference -> existing
+metrics/segments/drift -> decisions -> existing report writer`.
+
+`predictions.py` validates both model classes and both probability columns.
+`raw_audit.py` preserves CSV row order and defects, checks audit-only extra
+columns, retains blocked-family reasons and runs independent feature drift.
+The runner fingerprints the model as well as snapshots/config and checks all
+inputs again before its final completion manifest. No inference refits models.
+
+`segments.py` adds metric-specific best comparators with ties and support.
+`drift.py` retains total variation and adds explicitly smoothed base-2
+Jensen-Shannon distance. `scenarios.py` now independently checks decision and gate
+verdicts when assessing the saved-score controls.
+
+`cli_experiments.py` generates invented rows, fits two clean baseline pipelines
+once, writes five configs per model and invokes the ordinary CLI in ten processes.
+Its assessor verifies measurements, gate identities, decisions, actual process
+exits and provenance. Full protocol and differences in exit policy are recorded
+in RAW_AUDITS.md. Phases 8 and 9 remain planned; this change adds neither CI nor MLflow.

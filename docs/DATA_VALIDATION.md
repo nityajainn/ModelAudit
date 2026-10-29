@@ -1,5 +1,9 @@
 # Phase 2: data validation
 
+The original phase protocol below remains applicable to its saved-artifact API.
+The October 30 scope corrections add the [raw fitted-model workflow](RAW_AUDITS.md);
+see the [correction record](SCOPE_CORRECTIONS.md) for current capabilities.
+
 ## Acceptance criteria
 
 - Inspect schema, missingness, duplicate rows and identifiers, cross-split overlap,

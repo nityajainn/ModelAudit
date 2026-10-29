@@ -26,7 +26,9 @@ the final outcome/error. Logging stays scoped to ModelAudit.
 
 `check-config` validates schema and resolves paths; it does not read or approve
 input datasets. `run` requires all input files. Neither command downloads data,
-fits models, loads serialized estimators, selects thresholds, or pushes anything.
+fits models, selects thresholds, or pushes anything. Version 1 never loads serialized
+estimators. [Version 2](RAW_AUDITS.md) loads only an explicitly trusted, hash-pinned
+local fitted model.
 The existing development scripts continue to work independently.
 
 ## Configuration version 1

@@ -1,5 +1,9 @@
 # Phase 3: model evaluation
 
+The original phase protocol below remains applicable to its saved-artifact API.
+The October 30 scope corrections add the [raw fitted-model workflow](RAW_AUDITS.md);
+see the [correction record](SCOPE_CORRECTIONS.md) for current capabilities.
+
 ## Acceptance criteria
 
 - Evaluate aligned binary labels and positive-class probabilities without changing

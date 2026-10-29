@@ -45,8 +45,14 @@ class CheckPolicy:
     minimum_pairs: int = 20
     maximum_categories: int = 20
     minimum_category_rows: int = 5
+    prohibited_columns: tuple[str, ...] = ()
 
     def __post_init__(self):
+        names = self.prohibited_columns
+        if (not isinstance(names, (tuple, list)) or not all(isinstance(n, str) and n.strip() for n in names)
+                or len(set(names)) != len(names)):
+            raise ValueError("prohibited_columns must contain distinct nonempty column names.")
+        object.__setattr__(self, "prohibited_columns", tuple(names))
         for name, lower, upper in (("missing_fraction", 0, 1),
                                    ("correlation_threshold", 0, 1)):
             value = getattr(self, name)
@@ -80,8 +86,8 @@ def _normalize(table):
     return result
 
 
-def audit_data(train: pd.DataFrame, reference: pd.DataFrame, schema: DataSchema,
-               policy: CheckPolicy | None = None) -> dict:
+def _audit_pair(train: pd.DataFrame, reference: pd.DataFrame, schema: DataSchema,
+                policy: CheckPolicy | None = None, *, reference_labeled=True, inspect_extra_columns=False) -> dict:
     """Inspect two tables without changing them or fitting a model.
 
     Findings contain column names and aggregate counts, never source row values.
@@ -103,7 +109,11 @@ def audit_data(train: pd.DataFrame, reference: pd.DataFrame, schema: DataSchema,
         if not isinstance(original, pd.DataFrame):
             raise TypeError(f"{name} must be a pandas DataFrame.")
         if not all(isinstance(column, str) and column.strip() for column in original.columns):
-            raise ValueError("Input column labels must be nonempty strings.")
+            if not inspect_extra_columns:
+                raise ValueError("Input column labels must be nonempty strings.")
+            add("schema", name, "fail", "Column labels must be nonempty strings.")
+            add("data_checks", name, "skipped", "Checks require valid column labels.")
+            continue
         if original.columns.has_duplicates:
             add("schema", name, "fail", "Duplicate column labels prevent unambiguous checks.",
                 duplicate_columns=sorted(set(original.columns[original.columns.duplicated()])))
@@ -111,11 +121,17 @@ def audit_data(train: pd.DataFrame, reference: pd.DataFrame, schema: DataSchema,
             continue
         table = _normalize(original)
         tables[name] = table
-        missing = sorted(set(schema.columns) - set(table.columns))
+        labeled = name == "train" or reference_labeled
+        expected = set(schema.columns) - (set() if labeled else {schema.target})
+        missing = sorted(expected - set(table.columns))
+        prohibited = sorted(set(policy.prohibited_columns) & set(table.columns))
+        if policy.prohibited_columns:
+            add("prohibited_columns", name, "fail" if prohibited else "pass",
+                "Configured forbidden columns must be absent.", columns=prohibited)
         extra = sorted(set(table.columns) - set(schema.columns))
         invalid_types, nonfinite, usable = [], {}, set()
         for column in schema.columns:
-            if column not in table:
+            if column not in table or (column == schema.target and not labeled):
                 continue
             series = table[column]
             numeric = column in schema.numeric or column == schema.target
@@ -128,15 +144,26 @@ def audit_data(train: pd.DataFrame, reference: pd.DataFrame, schema: DataSchema,
                     nonfinite[column] = count
                     continue
             usable.add(column)
+        if inspect_extra_columns:
+            for column in extra:
+                if _numeric(table[column]):
+                    count = int((~np.isfinite(table[column].dropna().to_numpy(dtype=float))).sum())
+                    if count:
+                        nonfinite[column] = count
+                    else:
+                        usable.add(column)
+                elif _strings(table[column]):
+                    usable.add(column)
         valid_columns[name] = usable
-        add("schema", name, "fail" if missing or extra or invalid_types or nonfinite else "pass",
+        add("schema", name, "fail" if missing or (extra and not inspect_extra_columns) or invalid_types or nonfinite
+            else "warn" if extra else "pass",
             "Expected columns, scalar types and finite numerical values checked.",
             missing_columns=missing, unexpected_columns=extra,
             invalid_type_columns=invalid_types, nonfinite_counts=nonfinite)
         add("row_count", name, "pass" if len(table) else "fail",
             "A nonempty dataset is required.", rows=len(table))
         for column in schema.columns:
-            if column not in table:
+            if column not in table or (column == schema.target and not labeled):
                 continue
             count = int(table[column].isna().sum())
             fraction = count / len(table) if len(table) else None
@@ -147,17 +174,19 @@ def audit_data(train: pd.DataFrame, reference: pd.DataFrame, schema: DataSchema,
                 column=column, count=count, fraction=fraction, required=required,
                 warning_threshold=policy.missing_fraction)
         target_ok = False
-        if schema.target in usable and len(table):
+        if labeled and schema.target in usable and len(table):
             labels = table[schema.target]
             invalid = int((labels.notna() & ~labels.isin([0, 1])).sum())
             classes = int(labels.dropna().nunique())
             target_ok = not invalid and not labels.isna().any() and classes == 2
-            add("target", name, "pass" if target_ok else "fail",
+            target_status = ("pass" if target_ok else "warn" if name != "train" and not invalid
+                             and not labels.isna().any() and classes == 1 else "fail")
+            add("target", name, target_status,
                 "Target must be nonmissing numeric 0/1 with both classes present.",
                 invalid_labels=invalid, missing=int(labels.isna().sum()), classes=classes)
         else:
             add("target", name, "skipped", "Target requires a nonempty finite numerical column.")
-        if len(table) and set(schema.columns).issubset(usable) and not extra:
+        if len(table) and expected.issubset(usable) and not extra:
             add("duplicate_rows", name, "warn" if table.duplicated().any() else "pass",
                 "Exact duplicate rows counted beyond their first occurrence.",
                 count=int(table.duplicated().sum()))
@@ -179,7 +208,7 @@ def audit_data(train: pd.DataFrame, reference: pd.DataFrame, schema: DataSchema,
             else:
                 add("duplicate_identifiers", name, "skipped", "Requires valid nonempty identifiers.")
 
-        for column in schema.features:
+        for column in schema.features + (tuple(extra) if inspect_extra_columns else ()):
             if not target_ok or column not in usable:
                 add("leakage_heuristic", name, "skipped", "Requires a valid predictor and binary target.",
                     column=column)
@@ -187,7 +216,8 @@ def audit_data(train: pd.DataFrame, reference: pd.DataFrame, schema: DataSchema,
             pairs = table[[column, schema.target]].dropna()
             x, y = pairs[column], pairs[schema.target]
             signals, correlation = [], None
-            if column in schema.numeric and len(pairs) >= 2 and y.nunique() == 2:
+            numeric_predictor = column in schema.numeric or (column in extra and _numeric(x))
+            if numeric_predictor and len(pairs) >= 2 and y.nunique() == 2:
                 values, labels = x.to_numpy(dtype=float), y.to_numpy(dtype=float)
                 if np.array_equal(values, labels):
                     signals.append("target_copy")
@@ -199,7 +229,7 @@ def audit_data(train: pd.DataFrame, reference: pd.DataFrame, schema: DataSchema,
             else:
                 reason = "Association is a review signal; it cannot establish the origin of a feature."
                 assessed = True
-                if column in schema.numeric:
+                if numeric_predictor:
                     # Scale first to avoid overflow for very large finite input values.
                     values = x.to_numpy(dtype=float)
                     scale = float(np.max(np.abs(values)))
@@ -261,8 +291,24 @@ def audit_data(train: pd.DataFrame, reference: pd.DataFrame, schema: DataSchema,
     return {"format_version": 1, "status": status, "counts": counts,
             "schema": {"numeric": list(schema.numeric), "categorical": list(schema.categorical),
                        "target": schema.target, "identifier": schema.identifier},
-            "policy": {key: getattr(policy, key) for key in policy.__dataclass_fields__},
+            "policy": {key: list(getattr(policy,key)) if isinstance(getattr(policy,key),tuple) else getattr(policy,key) for key in policy.__dataclass_fields__},
             "findings": findings,
             "limitations": ["Passing checks do not establish absence of leakage.",
                             "No temporal, provenance, causal or post-outcome feature analysis is performed.",
                             "Target-association heuristics require human review; legitimate predictors can trigger them."]}
+
+
+def audit_data(train, reference, schema, policy=None, *, current=None, current_labeled=False, inspect_extra_columns=False):
+    """Audit reference and optional current data; unlabeled current never invents labels."""
+    if type(current_labeled) is not bool:
+        raise ValueError("current_labeled must be a boolean.")
+    result = _audit_pair(train, reference, schema, policy, inspect_extra_columns=inspect_extra_columns)
+    if current is not None:
+        extra = _audit_pair(train, current, schema, policy, reference_labeled=current_labeled, inspect_extra_columns=inspect_extra_columns)
+        result["findings"].extend({**f, "dataset": "current"} for f in extra["findings"]
+                                  if f["dataset"] == "reference")
+        result["counts"] = {s: sum(f["status"] == s for f in result["findings"])
+                            for s in ("pass", "warn", "fail", "skipped")}
+        result["status"] = ("fail" if result["counts"]["fail"] else "warn"
+                            if result["counts"]["warn"] else "pass")
+    return result

@@ -20,7 +20,7 @@ DEFAULTS = {
                  "minimum_class_rows": 10, "minimum_predicted_positives": 10, "maximum_groups": 50},
     "drift": {"numeric": [], "categorical": [], "probability": None, "target": None,
               "threshold": 0.5, "minimum_rows": 30, "minimum_class_rows": 10,
-              "minimum_predicted_positives": 10, "maximum_categories": 100, "n_bins": 10},
+              "minimum_predicted_positives": 10, "maximum_categories": 100, "n_bins": 10, "smoothing": 1e-6},
 }
 
 
@@ -52,7 +52,7 @@ def _options(name, supplied, base):
     _mapping(supplied, allowed, f"checks.{name}")
     options = {**deepcopy(DEFAULTS[name]), **deepcopy(supplied)}
     if name == "data":
-        return asdict(CheckPolicy(**options))
+        return {k:list(v) if isinstance(v,tuple) else v for k,v in asdict(CheckPolicy(**options)).items()}
     options["threshold"] = _threshold(options["threshold"])
     for key in ("minimum_rows", "minimum_class_rows", "minimum_predicted_positives", "minimum_bin_rows"):
         if key in options:
@@ -77,6 +77,9 @@ def _options(name, supplied, base):
                 or len(set(columns)) != len(columns)):
             raise ConfigError("segments.columns must list distinct categorical Telco predictors.")
     if name == "drift":
+        options["smoothing"] = _threshold(options["smoothing"])
+        if options["smoothing"] >= 1:
+            raise ConfigError("smoothing must be in [0,1).")
         _roles(options["numeric"], options["categorical"], options["probability"], options["target"])
         for key in ("reference", "current"):
             options[key] = _path(options.get(key), base, f"drift.{key}")
@@ -91,6 +94,9 @@ def load_audit_config(path) -> dict:
     """
     path = Path(path).resolve()
     raw = load_config(path)
+    if type(raw.get("version")) is int and raw["version"] == 2:
+        from .raw_config import normalize_raw_config
+        return normalize_raw_config(raw, path)
     _mapping(raw, {"version", "inputs", "checks", "gates"}, "Configuration")
     if type(raw.get("version")) is not int or raw["version"] != 1:
         raise ConfigError("version must be the integer 1.")
