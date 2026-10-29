@@ -204,3 +204,34 @@ repository 1427414883. No remote changes were made during this verification.
   secondary URLs remain unchanged; remote Phase 0–5 branch hashes are preserved.
 - Phase 7 remains planned. Phase 6 requires separate explicit push approval;
   no Phase 6 publication or altered historical timestamps are claimed here.
+
+## 2026-10-30 — Phase 6 publication rechecked
+
+Confirmed the prior approved publication: main and phase/6-cli-reports both point
+to `7854ebd`. Earlier phase branches and timestamps remain unchanged, with no tags.
+The destination is still nityajainn/ModelAudit, repository 1427414883.
+
+## 2026-10-30 — Phase 7 controlled experiments verified locally
+
+- Started `codex/phase-7-controlled-experiments` from published Phase 6 in the
+  independent checkout. Captured the original project's current 25,204-file
+  baseline including Git state; its working tree was clean.
+- Defined the protocol in CONTROLLED_EXPERIMENTS.md before running real-artifact
+  scenarios. Implemented deterministic copied-data experiments, aggregate evidence,
+  explicit expected observations, and escaped offline summaries with output hashes.
+- Added the `experiments` command to the existing CLI. Preserved all measurement
+  engines and ordinary audit semantics. No dependency changes or model loading.
+- Passed 238 tests in 72.493 seconds with warnings treated as errors, including
+  29 new Phase 7 tests. Dependency consistency checks passed.
+- Ran the installed command twice: all 12 scenarios matched expectations, with
+  identical case files and repeat measurements. Audit outcomes included review,
+  deliberate failures and checksum rejection; experiment success is not model approval.
+- Recorded actual changes, including zero marginal prediction drift despite worsened
+  labeled scores after permutation. All 69 pre-existing data/model/report files
+  were unchanged; the control reproduced prior measurements. See EXPERIMENTS.md.
+- Rechecked all 25,204 original-project files against this phase's starting baseline
+  with no changed paths. Original remotes and earlier published branches are preserved.
+- Verified nityajainn authentication and destination identity without changing accounts
+  or credentials. No inherited commits or artificial dates were introduced.
+- All planned phases are implemented locally. Phase 7 remains pending separate
+  explicit push approval; no Phase 7 publication is claimed by this entry.

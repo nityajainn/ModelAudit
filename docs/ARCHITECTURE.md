@@ -125,3 +125,25 @@ The foundation YAML loader retains its generic behavior; its docstring now point
 to the separate schema validator. Configuration/gate semantics, output completion
 rules and limits are in CLI_REPORTS.md. A complete audit may require review or fail;
 only the final valid manifest distinguishes completion from a partial run.
+
+## Phase 7 boundaries
+
+- `scenarios.py`: builds eleven deterministic in-memory scenarios from verified
+  Telco tables and paired probability vectors. Copies isolate each transformation.
+  It records the unchanged control, data defects, feature shifts, score corruption
+  and an artificial small cohort with explicit expected observations and evidence.
+- `experiment_suite.py`: verifies the source artifacts, runs the scenarios and a
+  checksum rejection exercise on a temporary copy, checks source hashes again,
+  and writes aggregate evidence plus a final completion manifest exclusively.
+- `experiment_reports.py`: renders escaped Markdown and self-contained HTML,
+  keeping expectation success separate from each scenario's audit outcome.
+- `cli.py`: adds the `experiments` subcommand to the existing entry point without
+  changing ordinary `run` or `check-config` semantics. No dependency changes.
+
+Existing data, metric, drift, support and gate engines are reused without edits.
+Malformed data copies intentionally use the in-memory data-check API; real source
+artifacts still pass the strict Phase 1 loader and prediction/hash pairing checks.
+No model is fitted or deserialized, no source manifest is rewritten, and altered
+features are not assigned fabricated model responses. Score transformations are
+labeled as manipulations. The protocol and limitations are documented in
+CONTROLLED_EXPERIMENTS.md; measurements are in EXPERIMENTS.md.

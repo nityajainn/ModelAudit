@@ -333,3 +333,81 @@ Run directories include their full JSON evidence, Markdown/HTML summaries and
 completion manifests. Provenance records real UTC times and parent `1cc99e8` with
 a dirty working tree because verification preceded the Phase 6 commit. Phase 7
 controlled experiments remain planned; Phase 6 publication awaits explicit approval.
+
+## 2026-10-30 — Phase 7 controlled scenarios
+
+Ran the installed `modelaudit experiments` command twice from a different working
+directory, against the existing verified 5,634 training rows, 1,409 reference rows
+and both saved probability arrays. The protocol was defined before these runs.
+Transformations operated on copies only. No training, model deserialization, new
+source-data acquisition or actual production incident is involved.
+
+All **12 scenarios matched their specified observations** in both runs. This is
+experiment success, not a passing model audit: four scenarios required review,
+seven failed checks/demonstration gates, and the copied checksum defect was rejected.
+
+| Scenario | Actual evidence | Audit outcome |
+| --- | --- | --- |
+| control | Existing 91 passing data findings and 3 warnings; zero feature/prediction distances and defined performance changes | review |
+| missingness | 423 new missing MonthlyCharges rows, fraction 0.30021291696238467 | review |
+| duplicate_rows | 25 exact duplicate rows and 25 repeated identifiers | fail |
+| identifier_overlap | 25 reference rows with identifiers occurring in training | fail |
+| target_copy | Both partitions flagged target_copy and high_target_correlation for the deliberately added feature | review |
+| missing_column | Reference schema explicitly named missing Contract | fail |
+| numeric_shift | MonthlyCharges empirical CDF distance 0.9992902767920511 after adding 100; missingness unchanged | fail |
+| unseen_category | All 1,409 Contract values replaced; unseen fraction and categorical total variation both 1 | fail |
+| inverted_probabilities | Both rankings inverted and supported ROC differences breached the demonstration bound | fail |
+| permuted_probabilities | Rotation of 469 rows preserved marginal score distributions while labeled performance worsened | fail |
+| sparse_segment | Artificial 31-row cohort had one positive; supported ROC comparison withheld for both models | review |
+| corrupt_checksum | Exact Logistic Regression probability checksum mismatch; no successful report written | rejected |
+
+The control preserves the previously known duplicate-predictor/overlap warnings;
+it does not declare the original dataset defect-free. Target-copy association is
+still presented as a review signal by the general heuristic, even though this
+experiment's transformation deliberately supplies the target itself.
+
+| Manipulation | Model | Original ROC AUC | Changed ROC AUC | Supported ROC difference | Brier loss increase |
+| --- | --- | ---: | ---: | ---: | ---: |
+| inversion | Logistic Regression | 0.843035 | 0.156965 | -0.686070 | 0.455807 |
+| inversion | Random Forest | 0.821429 | 0.178571 | -0.642858 | 0.449760 |
+| permutation | Logistic Regression | 0.843035 | 0.515611 | -0.327424 | 0.115916 |
+| permutation | Random Forest | 0.821429 | 0.520528 | -0.300902 | 0.115649 |
+
+Permutation produced exactly zero prediction CDF distance and zero histogram total
+variation for both models, so its distribution gates passed. Its labeled ROC-change
+gates failed. This demonstrates a specific marginal-drift blind spot; it does not
+estimate real-incident detection rates or prove the source of a future failure.
+The fixed experiment bounds (distance maximum 0.10 and supported ROC-change minimum
+-0.05) are demonstrations, not chosen production thresholds or tuned models.
+
+The sparse cohort contains one positive and 30 negatives. Logistic Regression
+predicted six positives and Random Forest three. Both have low actual-positive and
+predicted-positive support warnings; supported ROC differences and the corresponding
+gates remain unavailable. Selection used labels to test this boundary, so it is
+not a representative population or a fairness assessment.
+
+The two summaries match exactly excluding real runtime context. All twelve case
+JSON files are byte-identical between runs. Each final manifest correctly hashes
+15 outputs (12 cases plus JSON, Markdown and HTML summaries). The control's full
+data measurements match the Phase 6 data report, and both full control comparison
+objects match the saved Phase 5 identity reports. All **69 pre-existing** files
+under data/, models/ and reports/generated/ retained their hashes, including all
+19 saved data/model artifacts.
+
+All **238 tests passed in 72.493 seconds** with warnings treated as errors, including
+29 new Phase 7 tests. Tests cover exact injected counts, unchanged controls,
+inversion/permutation behavior, sparse support, invalid shapes/types and scenario
+prerequisites, source immutability, exact checksum rejection, unrelated-error
+propagation, unmet-expectation exit behavior, exclusive outputs, failure markers,
+input mutation detection, repeatability and report escaping. Dependency consistency
+checks passed without installing or upgrading packages.
+
+Ignored local evidence:
+
+- `reports/generated/phase7-experiments-20261030/`
+- `reports/generated/phase7-experiments-20261030-repeat/`
+- `reports/generated/phase7-verification-20261030.json`
+
+Reports retain actual UTC timestamps and parent commit `7854ebd` with a dirty
+working tree because verification preceded the Phase 7 commit. The planned local
+implementation is complete; Phase 7 publication still requires explicit approval.

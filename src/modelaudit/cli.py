@@ -7,6 +7,7 @@ import logging
 from pathlib import Path
 
 from .audit_config import load_audit_config
+from .experiment_suite import run_experiments
 from .logging import configure_logging
 from .runner import run_audit
 
@@ -21,6 +22,11 @@ def main(argv=None):
     run.add_argument("--config", type=Path, required=True)
     run.add_argument("--output", type=Path, required=True)
     run.add_argument("--quiet", action="store_true")
+    experiments = subcommands.add_parser("experiments", help="Run controlled defects on copies; preserve source artifacts.", allow_abbrev=False)
+    experiments.add_argument("--prepared", type=Path, default=Path("data/prepared"))
+    experiments.add_argument("--models", type=Path, default=Path("models/baseline"))
+    experiments.add_argument("--output", type=Path, required=True)
+    experiments.add_argument("--quiet", action="store_true")
     args = parser.parse_args(argv)
     try:
         if args.command == "check-config":
@@ -28,9 +34,16 @@ def main(argv=None):
             print(f"Configuration valid: {', '.join(config['checks'])}. Input data has not been audited.")
             return 0
         configure_logging(logging.ERROR if args.quiet else logging.INFO)
+        if args.command == "experiments":
+            summary = run_experiments(args.prepared, args.models, args.output)
+            matched = sum(case["expectations_met"] for case in summary["scenarios"])
+            print(f"Experiments complete: {matched}/{len(summary['scenarios'])} scenarios matched expectations; "
+                  f"report={args.output.resolve() / 'summary.html'}")
+            return summary["exit_code"]
         report = run_audit(args.config, args.output)
     except (OSError, ValueError, csv.Error) as exc:
-        parser.exit(2, f"Audit could not complete: {exc}\n")
+        label = "Experiments" if args.command == "experiments" else "Audit"
+        parser.exit(2, f"{label} could not complete: {exc}\n")
     decision = report["decision"]
     print(f"Audit complete: {decision['status'].upper()}; report={args.output.resolve() / 'summary.html'}")
     return decision["exit_code"]

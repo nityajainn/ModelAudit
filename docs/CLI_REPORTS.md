@@ -136,3 +136,14 @@ names and are ignored by Git; review them before sharing.
 The installed entry point follows the [Python packaging guide](https://packaging.python.org/en/latest/guides/writing-pyproject-toml/).
 Command parsing uses [Python argparse](https://docs.python.org/3.14/library/argparse.html).
 No dependency additions or upgrades are needed for this phase.
+
+## Phase 7 experiment subcommand
+
+`modelaudit experiments --prepared data/prepared --models models/baseline --output
+reports/generated/my-experiments` runs the fixed controlled scenario suite on
+copies. It does not change the version 1 audit configuration schema or ordinary
+`run` results. Its exit code 0 means every specified experiment expectation was
+met, 1 means an unmet expectation in a completed suite, and 2 means execution/input
+failure. This is distinct from model-audit pass/review/fail outcomes. See
+[the controlled experiment protocol](CONTROLLED_EXPERIMENTS.md) before interpreting
+the generated summary and per-case evidence.

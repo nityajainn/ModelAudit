@@ -11,8 +11,8 @@ scope, not completed capabilities. No future completion dates are assigned.
 | 3 | Binary model metrics, calibration and threshold analysis | Published |
 | 4 | Segment performance comparisons and support warnings | Published |
 | 5 | Feature/prediction drift and labeled performance changes | Published |
-| 6 | Full configuration, CLI, orchestration and reports | Verified locally; awaiting push approval |
-| 7 | Controlled defective scenarios and recorded experiments | Planned |
+| 6 | Full configuration, CLI, orchestration and reports | Published |
+| 7 | Controlled defective scenarios and recorded experiments | Verified locally; awaiting push approval |
 
 For each phase: define acceptance criteria, implement its scope, run tests,
 record actual findings, then commit locally and request explicit push approval. Use phase branches for

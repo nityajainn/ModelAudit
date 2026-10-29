@@ -4,13 +4,13 @@ An incremental project for examining data quality and model behavior before
 a release. Its intended scope is offline evaluation of scikit-learn binary
 classifiers, with explicit evidence and limitations.
 
-**Current stage: Phase 6 — configuration, CLI and reports (verified locally).** The package includes configuration
+**Current stage: Phase 7 — controlled experiments (verified locally).** The package includes configuration
 loading, logging, reproducible Telco preparation, two baseline pipelines, data-quality
 checks, binary model metrics, calibration measurements, threshold comparisons, and
 segment comparisons with support warnings, feature/prediction distribution comparisons,
 and supported labeled performance changes. A public command now runs the configured
-checks and creates JSON, Markdown and offline HTML reports. Controlled defect
-experiments remain Phase 7 work.
+checks and creates JSON, Markdown and offline HTML reports. A reproducible experiment
+suite now exercises deliberate defects on copies of the verified inputs.
 
 ## Local setup
 
@@ -163,7 +163,32 @@ are not deployment approval. The recorded baseline audit completed with **16
 review items and no data failures**. All **209 tests passed**, repeated results
 matched, and all 44 pre-existing data/model/report artifacts remained unchanged.
 See [configuration, gate and completion rules](docs/CLI_REPORTS.md) and
-[actual Phase 6 results](docs/EXPERIMENTS.md). Publication awaits separate approval.
+[actual Phase 6 results](docs/EXPERIMENTS.md). Phase 6 is published.
+
+## Exercise controlled defects
+
+```powershell
+.venv\Scripts\modelaudit experiments --prepared data/prepared --models models/baseline --output reports/generated/my-experiments
+```
+
+The command runs an unchanged control and deliberate missingness, duplicates,
+identifier overlap, target-copy leakage, missing-column, feature-shift, unseen-category,
+probability-inversion, probability-permutation, sparse-cohort and checksum scenarios.
+Source data/models are preserved; no model is retrained or deserialized. Generated
+evidence and summaries stay in a new ignored output directory.
+
+On 2026-10-30, **12 of 12 scenarios matched their expected observations** in two
+runs, with byte-identical case evidence. This means the experiments behaved as
+specified, not that the corrupted models/data passed their audits. In particular,
+scrambling prediction-to-row alignment left distribution distances at zero while
+ROC AUC fell from 0.843 to 0.516 for Logistic Regression and from 0.821 to 0.521 for
+Random Forest. Labeled comparisons exposed what marginal drift checks could not.
+
+All **238 tests passed**, including 29 new Phase 7 tests. All 69 pre-existing
+data/model/report files were unchanged. See the [scenario protocol and limits](docs/CONTROLLED_EXPERIMENTS.md)
+and [recorded results](docs/EXPERIMENTS.md). The planned phases are implemented
+locally; Phase 7 publication awaits separate approval. This is an educational
+offline toolkit, not a production-readiness certification.
 
 ## Development
 
