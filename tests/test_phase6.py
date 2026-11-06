@@ -33,7 +33,7 @@ class ConfigurationTests(unittest.TestCase):
 
     def test_defaults_and_paths_resolve_relative_to_config(self):
         config = self.load()
-        self.assertEqual(config['checks']['drift']['reference'], str(self.root/'a.csv'))
+        self.assertEqual(config['checks']['drift']['reference'], str(self.root.resolve() / 'a.csv'))
         self.assertEqual(config['checks']['drift']['minimum_rows'], 30)
         self.assertEqual(config['gates'], [])
         self.assertEqual(config['inputs'], {})

@@ -284,3 +284,17 @@ clean passed (0), contamination failed with 20 overlaps (1), and missing input
 returned an execution error (2). Generated evidence stays in the ignored
 reports/generated/phase8-20261106 directory. Hosted CI results will be available
 after publication. Phase 9 remains planned.
+
+### Phase 8 publication and hosted Windows check
+
+Published `89eb794` on main and phase/8-testing-ci after approval. The
+[first hosted run](https://github.com/nityajainn/ModelAudit/actions/runs/42264173503)
+passed quality, packaging and both Linux test jobs, including coverage.
+Windows passed 270 tests and failed one configuration-test path comparison.
+The runner supplied the short spelling of its temporary directory while the
+application returned the resolved long spelling. The test now resolves its
+expected directory before checking the full reference CSV path.
+
+All 33 Phase 6 tests passed locally on Windows/Python 3.12 after the correction.
+The local filesystem supplied one spelling for the temporary directory, so
+the hosted Windows run remains the check for the runner-specific short alias.
