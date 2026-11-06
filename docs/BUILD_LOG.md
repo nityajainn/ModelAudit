@@ -261,3 +261,26 @@ previous commits. No original code, history, remote or credential configuration
 was changed. Restored planned Phases 8 and 9, and corrected the stale Phase 7
 publication wording. This entry records local verification, not push approval
 or publication of these corrections.
+
+## 2026-11-06 - Phase 8 local verification
+
+Started from published commit `59a6db6`. Added a read-only Actions workflow
+for Ubuntu/Python 3.11 and 3.12, Windows/Python 3.12, package inspection, and
+installed console checks. The application package has full subprocess-aware
+measurement with separate 90% line and combined coverage requirements. Four new
+tests exercise the release checks. Removed four unused test imports found by
+the repository lint check. Formatting checks cover the new Phase 8 Python files
+to preserve earlier phases' formatting.
+
+Windows/Python 3.12 passed 271 tests in 178.06 seconds. Coverage included 1,868
+of 1,923 executable statements (97.14%) and 2,601 of 2,695 statements and branch
+destinations combined (96.51%). The module CLI entry point reached full statement
+coverage. On Windows/Python 3.14 the 267 pre-existing tests also passed under
+coverage. Tool and runtime dependency checks passed.
+
+The source archive and wheel passed member, path and console metadata checks.
+A fresh wheel environment ran the installed command outside the checkout:
+clean passed (0), contamination failed with 20 overlaps (1), and missing input
+returned an execution error (2). Generated evidence stays in the ignored
+reports/generated/phase8-20261106 directory. Hosted CI results will be available
+after publication. Phase 9 remains planned.

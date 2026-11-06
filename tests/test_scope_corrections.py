@@ -3,7 +3,6 @@ import json
 from pathlib import Path
 import shutil
 import subprocess
-import sys
 import tempfile
 import unittest
 from unittest.mock import Mock, patch
@@ -15,7 +14,6 @@ from sklearn.linear_model import LogisticRegression
 import yaml
 
 from modelaudit.artifacts import fingerprint
-from modelaudit.audit_config import load_audit_config
 from modelaudit.cli_experiments import run_cli_experiments, assess_report, synthetic_frame, scenario_inputs
 from modelaudit.config import ConfigError
 from modelaudit.data_checks import DataSchema, CheckPolicy, audit_data

@@ -3,7 +3,6 @@ from copy import deepcopy
 from html.parser import HTMLParser
 import io
 import json
-from pathlib import Path
 import subprocess
 import sys
 import unittest
@@ -19,7 +18,7 @@ from modelaudit.dataset import CATEGORICAL, IDENTIFIER, TARGET
 from modelaudit.experiment_reports import render_experiments
 from modelaudit.experiment_suite import _checksum_case, run_experiments
 from modelaudit.model_audit import BASELINE_NAMES, _load_prediction_inputs
-from modelaudit.scenarios import build_scenarios, COPY_COLUMN, NEW_CATEGORY
+from modelaudit.scenarios import build_scenarios, NEW_CATEGORY
 import test_phase3
 
 

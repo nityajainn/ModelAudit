@@ -4,7 +4,7 @@ An incremental project for examining data quality and model behavior before
 a release. Its intended scope is offline evaluation of scikit-learn binary
 classifiers, with explicit evidence and limitations.
 
-**Current stage: Phase 7 - published baseline, with scope corrections verified locally; push approval pending.** The package includes configuration
+**Current stage: Phase 8 verification.** See [testing, coverage and package checks](docs/TESTING_CI.md). The package includes configuration
 loading, logging, reproducible Telco preparation, two baseline pipelines, data-quality
 checks, binary model metrics, calibration measurements, threshold comparisons, and
 segment comparisons with support warnings, feature/prediction distribution comparisons,
@@ -187,8 +187,8 @@ Random Forest. Labeled comparisons exposed what marginal drift checks could not.
 All **238 tests passed**, including 29 new Phase 7 tests. All 69 pre-existing
 data/model/report files were unchanged. See the [scenario protocol and limits](docs/CONTROLLED_EXPERIMENTS.md)
 and [recorded results](docs/EXPERIMENTS.md). The initial Phase 7 implementation is published. The October 30 review identified
-scope gaps; [the correction record](docs/SCOPE_CORRECTIONS.md) describes the local
-follow-up. Phases 8 (CI/package verification) and 9 (MLflow) remain planned. This is an educational
+scope gaps; [the correction record](docs/SCOPE_CORRECTIONS.md) describes the published
+follow-up. Phase 8 adds CI and package verification. Phase 9 covers MLflow. This is an educational
 offline toolkit, not a production-readiness certification.
 
 ## Fitted-model audits and full CLI controls

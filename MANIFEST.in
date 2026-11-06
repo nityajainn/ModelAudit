@@ -1,0 +1,6 @@
+include LICENSE README.md AGENTS.md constraints-python314.txt
+recursive-include docs *.md
+recursive-include configs *.yaml
+recursive-include tests *.py
+recursive-include scripts *.py
+global-exclude *.py[cod]
