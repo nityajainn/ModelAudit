@@ -66,14 +66,18 @@ def audit_baseline_predictions(prepared: str | Path, models: str | Path, output:
     if output.exists():
         raise FileExistsError(f"Choose a new report path: {output}")
     reference, predictions, paths, before = _load_prediction_inputs(prepared, models)
+    summary = json.loads((models / "summary.json").read_text(encoding="utf-8"))
     evaluations = {name: evaluate_binary(reference[TARGET].to_numpy(), probabilities,
                                          threshold=threshold, thresholds=thresholds,
                                          n_bins=n_bins, minimum_bin_rows=minimum_bin_rows)
                    for name, probabilities in predictions.items()}
+    metadata = {name: {**({"seed": summary["seed"]} if "seed" in summary else {}),
+                       "parameters": summary["models"][name].get("parameters", {})}
+                for name in evaluations}
     _verify_prediction_inputs(paths, before)
     result = {"format_version": 1, "context": run_context(), "inputs": before,
               "prediction_source": "Phase 1 P(Churn=1) arrays in verified reference CSV row order",
-              "model_deserialization_performed": False, "models": evaluations}
+              "model_deserialization_performed": False, "models": evaluations, "model_metadata": metadata}
     output.parent.mkdir(parents=True, exist_ok=True)
     write_json(output, result)
     return result

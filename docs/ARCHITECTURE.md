@@ -171,3 +171,15 @@ once, writes five configs per model and invokes the ordinary CLI in ten processe
 Its assessor verifies measurements, gate identities, decisions, actual process
 exits and provenance. Full protocol and differences in exit policy are recorded
 in RAW_AUDITS.md. Phases 8 and 9 remain planned; this change adds neither CI nor MLflow.
+
+## Phase 9 optional tracking
+
+The track CLI snapshots report bytes, validates the envelope, completion manifest
+and decision, then extracts available searchable fields. An explicit MLflow client
+uses SQLite and local artifacts. Report download/hash verification and field
+readback precede FINISHED; handled partial writes attempt FAILED.
+
+model_metadata.py describes an already loaded trusted estimator. The saved-score
+route reads available metadata inside its input verification window. Neither the
+tracker nor saved-score audit loads a model. Lazy MLflow imports preserve the
+core-only offline dependency set.

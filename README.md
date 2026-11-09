@@ -224,3 +224,18 @@ record actual work; commit timestamps record when commits are made.
 Future results will support human review, not automatically approve a model
 or guarantee the absence of leakage, bias, or production failures. Datasets,
 models, credentials, and generated reports remain outside Git.
+
+## Record audits in local MLflow
+
+Phase 9 adds optional tracking without changing the audit verdict:
+
+```powershell
+python -m pip install -e ".[tracking]"
+modelaudit track --report reports/generated/my-audit/report.json --store reports/generated/tracking
+```
+
+The command verifies the completed report, stores searchable results and its exact
+bytes, then verifies readback. Repeating a report creates a separate run and keeps
+its real provenance. Failed and review audits keep their verdicts. See
+[tracking instructions](docs/TRACKING.md) and the [release candidate](docs/RELEASE_NOTES.md).
+Publication awaits approval.

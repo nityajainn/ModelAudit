@@ -24,6 +24,7 @@ modelaudit = "modelaudit.cli:main"
 where = ["src"]
 
 [project.optional-dependencies]
+tracking = ["mlflow>=3.7,<4"]
 verify = [
     "build>=1.2,<2",
     "coverage>=7.10.6,<8",

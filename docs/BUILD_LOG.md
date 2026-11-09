@@ -298,3 +298,50 @@ expected directory before checking the full reference CSV path.
 All 33 Phase 6 tests passed locally on Windows/Python 3.12 after the correction.
 The local filesystem supplied one spelling for the temporary directory, so
 the hosted Windows run remains the check for the runner-specific short alias.
+
+## 2026-11-09 - Phase 9 local MLflow integration
+
+Started from published Phase 8 correction 0c099a7, whose main and phase branch
+runs passed all five hosted jobs. Implemented optional local tracking as a separate
+track command. It validates completed report envelopes and their manifests, records
+available parameters, metrics and tags, uploads the exact report bytes, and verifies
+artifact and field readback before FINISHED. Handled partial failures attempt FAILED.
+Retries create new runs with the same report-hash identity. Failure markers retain
+execution-error status. No timestamps, earlier commits or historical attribution
+are rewritten.
+
+Added model descriptions from already loaded fitted estimators and available seed/
+parameters from verified baseline summaries. Older reports remain supported without
+invented metadata. The optional dependency is mlflow>=3.7,<4; ordinary audit commands
+retain their core-only dependencies.
+
+The first full run exposed a changed-input error-message regression from the added
+summary read. Reading metadata before evaluation restored the existing final input
+verification behavior. The corrected Windows/Python 3.12.14 suite passed all 307
+tests (36 new tracking cases) and 266 subtests in 224.93 seconds. Coverage measured
+2,053/2,114 statements (97.11%) and 2,881/2,990 statements plus branch destinations
+(96.35%). Both 90% gates, CLI subprocess coverage, lint, formatting and dependency
+consistency checks passed. MLflow 3.18.0 with SQLAlchemy 2.1.8 emitted one upstream
+noload deprecation warning; the real store/readback tests passed.
+
+Source archive and wheel member checks passed. A fresh wheel environment outside
+the checkout passed clean (exit 0), contamination (exit 1, 20 ID overlaps) and missing
+input (exit 2) checks before installing MLflow. With the optional extra installed,
+the same protocol verified three FINISHED runs:
+
+| Case | Run ID | Report SHA-256 |
+| --- | --- | --- |
+| Clean | 2b6883eb076249f6afe96afd4bf5a70a | ce09ec9f868e1320755af9d3184dd50593225b545ead306cbf18a77f2e533118 |
+| Contamination | 8326d9d812b44cb9ae05697bd54abc04 | 3b8879eb3a4c7c297b4e76153a54f391b475b0dd851a579650078eaca17593f1 |
+| Repeated clean | ea138692bba941ecbeead3d2dd553224 | ce09ec9f868e1320755af9d3184dd50593225b545ead306cbf18a77f2e533118 |
+
+Downloaded artifact bytes, recorded outcomes, F1 and classifier random_state matched
+the source reports. The two clean runs have different run IDs and identical report
+hashes. Evidence, environments and SQLite stores remain outside Git; local evidence
+is under reports/generated/phase9-20261109.
+
+The CI matrix now includes tracking tests; the package job verifies the core wheel
+and optional integration separately. Hosted Phase 9 results require publication.
+Tracking/viewer instructions, architecture and release-candidate reproduction notes
+are documented. This phase is complete locally and awaits explicit push approval.
+No tag, release, package publication, collaborator or remote change was made.

@@ -37,7 +37,7 @@ def installed_command():
     return launcher
 
 
-def smoke(output):
+def smoke(output, tracking=False):
     launcher = installed_command()
     output = output.resolve()
     output.mkdir(parents=True, exist_ok=False)
@@ -144,6 +144,54 @@ def smoke(output):
             if failed:
                 raise RuntimeError(f"{case} failed: {failed}")
         summary[case] = result.returncode
+    if tracking:
+        from mlflow import MlflowClient
+
+        store = output / "tracking"
+        uri = "sqlite:///" + (store / "modelaudit.db").as_posix()
+        tracked = []
+        for case in ("clean", "contamination", "clean"):
+            report_path = output / case / "report.json"
+            before = report_path.read_bytes()
+            result = subprocess.run(
+                [str(launcher), "track", "--report", str(report_path), "--store", str(store)],
+                cwd=output,
+                capture_output=True,
+                text=True,
+                timeout=120,
+                check=False,
+            )
+            if result.returncode != 0:
+                raise RuntimeError(f"Tracking {case} failed: {result.stderr}")
+            run_id = result.stdout.split("run=", 1)[1].split(";", 1)[0]
+            client = MlflowClient(tracking_uri=uri)
+            run = client.get_run(run_id)
+            artifact = Path(client.download_artifacts(run_id, "report.json")).read_bytes()
+            expected = json.loads(before)
+            if (
+                run.info.status != "FINISHED"
+                or artifact != before
+                or report_path.read_bytes() != before
+                or run.data.tags["modelaudit.verdict"] != expected["decision"]["status"]
+                or run.data.params["model.0.parameter.random_state"] != "42"
+                or run.data.metrics["model.0.reference.f1"]
+                != expected["results"]["evaluation"]["models"]["fitted"]["classification"]["f1"]
+            ):
+                raise RuntimeError(f"Tracking readback disagrees for {case}")
+            tracked.append(
+                {
+                    "case": case,
+                    "run_id": run_id,
+                    "sha256": hashlib.sha256(artifact).hexdigest(),
+                    "verdict": run.data.tags["modelaudit.verdict"],
+                }
+            )
+        if (
+            len({row["run_id"] for row in tracked}) != 3
+            or tracked[0]["sha256"] != tracked[2]["sha256"]
+        ):
+            raise RuntimeError("Repeat tracking did not preserve run and audit identities")
+        summary["tracking"] = tracked
     (output / "summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
     print(summary)
 
@@ -151,4 +199,6 @@ def smoke(output):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("output", type=Path)
-    smoke(parser.parse_args().output)
+    parser.add_argument("--tracking", action="store_true")
+    args = parser.parse_args()
+    smoke(args.output, tracking=args.tracking)

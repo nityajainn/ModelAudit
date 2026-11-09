@@ -121,6 +121,9 @@ def run_raw_checks(config):
         options = config['checks'][name].copy()
         frame = tables['reference']
         result = {'models':{}}
+        if name == 'evaluation':
+            from .model_metadata import describe_model
+            result['model_metadata'] = {'fitted': describe_model(model)}
         reason = blocked.get('reference')
         if schema.target not in frame or frame.columns.has_duplicates:
             reason = 'A unique reference target column is required.'

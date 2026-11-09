@@ -30,8 +30,17 @@ def main(argv=None):
     experiments.add_argument("--quiet", action="store_true")
     experiments.add_argument("--mode", choices=("saved", "fitted"), default="saved")
     experiments.add_argument("--seed", type=int, default=42)
+    track = subcommands.add_parser("track", help="Record a verified audit in local MLflow.", allow_abbrev=False)
+    track.add_argument("--report", type=Path, required=True)
+    track.add_argument("--store", default="reports/generated/tracking")
     args = parser.parse_args(argv)
     try:
+        if args.command == "track":
+            from .tracking import track_report
+            tracked = track_report(args.report, args.store)
+            print(f"Tracking complete: run={tracked['run_id']}; audit={tracked['audit_id']}; "
+                  f"audit_exit={tracked['audit_exit']}; store={tracked['tracking_uri']}")
+            return 0
         if args.command == "check-config":
             config = load_audit_config(args.config)
             print(f"Configuration valid: {', '.join(config['checks'])}. Input data has not been audited.")
@@ -49,7 +58,7 @@ def main(argv=None):
             return summary["exit_code"]
         report = run_audit(args.config, args.output)
     except (OSError, ValueError, csv.Error, subprocess.SubprocessError) as exc:
-        label = "Experiments" if args.command == "experiments" else "Audit"
+        label = "Tracking" if args.command == "track" else "Experiments" if args.command == "experiments" else "Audit"
         parser.exit(2, f"{label} could not complete: {exc}\n")
     decision = report["decision"]
     print(f"Audit complete: {decision['status'].upper()}; report={args.output.resolve() / 'summary.html'}")
